@@ -9,8 +9,6 @@ const screens = [
   "VSO Summary",
 ];
 
-const ASK_NCO_SCREEN = screens.length;
-
 const resources = [
   ["Eligibility", "https://www.va.gov/disability/eligibility/"],
   ["How to file", "https://www.va.gov/disability/how-to-file-claim/"],
@@ -229,6 +227,52 @@ const askNcoScenarios = [
       { label: "VA representative search", icon: "external-link", url: "https://www.va.gov/get-help-from-accredited-representative/" },
     ],
   },
+  {
+    id: "decision-received",
+    category: "Decision",
+    title: "I got a decision.",
+    plain: "The decision letter is the key document. It explains what VA granted, denied, deferred, rated, and what deadlines may apply.",
+    why: "A decision can involve ratings, effective dates, denials, deferred issues, or review options. The safest next step depends on the letter, not a status screen or payment guess.",
+    next: "Save the decision date, list what was granted or denied, and ask accredited help to review anything confusing or time-sensitive.",
+    checks: ["Decision date", "Granted, denied, or deferred conditions", "Ratings and effective dates", "Reason for any denial", "Review deadline"],
+    vso: "Can you help me review what VA decided, what deadlines matter, and whether any review option makes sense?",
+    sourceLabel: "Official VA source",
+    sourceUrl: "https://www.va.gov/decision-reviews/",
+    routing: "VSO, accredited claims agent, or attorney may be appropriate for denials, low ratings, effective-date concerns, or complex review choices.",
+    actions: [
+      { label: "Decision reviews", icon: "external-link", url: "https://www.va.gov/decision-reviews/" },
+      { label: "Find accredited help", icon: "user-search", screen: 6 },
+    ],
+  },
+  {
+    id: "not-sure",
+    category: "Start here",
+    title: "I am not sure where I am.",
+    plain: "Not sure is a normal place to start. The safest first move is to identify whether you have not filed, already filed, received a VA request, have an exam, or have a decision letter.",
+    why: "The right next step changes depending on the stage. Sorting the stage first helps avoid missing a deadline or doing extra work that does not help.",
+    next: "Check VA.gov, mail, email, phone messages, and any paperwork you have. If you still are not sure, bring a simple summary to a VSO or accredited representative.",
+    checks: ["Any Intent to File or claim confirmation", "Any VA letter or deadline", "Any C&P exam notice", "Any decision letter", "Whether you can sign in to VA.gov"],
+    vso: "Can you help me figure out where I am in the process and what I should do next?",
+    sourceLabel: "Official VA source plus plain-language routing",
+    sourceUrl: "https://www.va.gov/claim-or-appeal-status/",
+    routing: "VSO or accredited help is recommended if you have a deadline, decision letter, missed exam, or cannot tell what VA is asking for.",
+    actions: [
+      { label: "Check claim status", icon: "external-link", url: "https://www.va.gov/claim-or-appeal-status/" },
+      { label: "Go to stage questions", icon: "map", screen: 1 },
+      { label: "Find a VSO", icon: "user-search", screen: 6 },
+    ],
+  },
+];
+
+const askNcoEntryOptions = [
+  { labelHtml: "I&rsquo;m thinking about filing", scenarioId: "intent" },
+  { labelHtml: "I&rsquo;m gathering evidence", scenarioId: "evidence-basics" },
+  { labelHtml: "I already submitted", scenarioId: "submitted-waiting" },
+  { labelHtml: "I got a VA letter", scenarioId: "va-request" },
+  { labelHtml: "I have a C&amp;P exam", scenarioId: "cp-exam" },
+  { labelHtml: "I got a decision", scenarioId: "decision-received" },
+  { labelHtml: "I need a VSO", scenarioId: "need-vso" },
+  { labelHtml: "I&rsquo;m not sure", scenarioId: "not-sure" },
 ];
 
 const state = {
@@ -281,7 +325,10 @@ const state = {
   },
   editingCondition: null,
   editingEvidenceItem: false,
-  askReturnContext: null,
+  askNco: {
+    open: false,
+    scenarioId: null,
+  },
   reviewTopics: [
     "Intent to File timing",
     "Accredited representative options",
@@ -303,6 +350,10 @@ const drawerBackdrop = document.querySelector("#drawerBackdrop");
 const closeResourcesButton = document.querySelector("#closeResourcesButton");
 const resourceList = document.querySelector("#resourceList");
 const miniMap = document.querySelector("#miniMap");
+const askNcoPanel = document.querySelector("#askNcoPanel");
+const askNcoBackdrop = document.querySelector("#askNcoBackdrop");
+const askNcoContent = document.querySelector("#askNcoContent");
+const closeAskNcoButton = document.querySelector("#closeAskNcoButton");
 
 function icon(name) {
   return `<i data-lucide="${name}" aria-hidden="true"></i>`;
@@ -327,37 +378,20 @@ function currentCondition() {
   return state.conditions.find((condition) => condition.id === state.selectedConditionId) || state.conditions[0];
 }
 
-function isAskNcoOpen() {
-  return state.screen === ASK_NCO_SCREEN && !state.pathwayMode;
-}
-
 function setScreen(index) {
-  state.askReturnContext = null;
+  state.askNco.open = false;
+  state.askNco.scenarioId = null;
   state.pathwayMode = null;
   state.screen = Math.max(0, Math.min(index, screens.length - 1));
   render();
   screenEl.scrollTop = 0;
 }
 
-function currentContext() {
-  return {
-    screen: state.screen,
-    pathwayMode: state.pathwayMode,
-    editingCondition: state.editingCondition,
-    editingEvidenceItem: state.editingEvidenceItem,
-  };
-}
-
-function openAskNco() {
-  if (isAskNcoOpen()) return;
-
-  state.askReturnContext = currentContext();
-  state.editingCondition = null;
-  state.editingEvidenceItem = false;
-  state.pathwayMode = null;
-  state.screen = ASK_NCO_SCREEN;
-  render();
-  screenEl.scrollTop = 0;
+function openAskNco(scenarioId = null) {
+  state.askNco.open = true;
+  state.askNco.scenarioId = scenarioId;
+  renderAskNcoPanel();
+  closeAskNcoButton.focus();
 }
 
 function nextScreen() {
@@ -365,23 +399,6 @@ function nextScreen() {
 }
 
 function previousScreen() {
-  if (isAskNcoOpen()) {
-    if (state.askReturnContext) {
-      const returnContext = state.askReturnContext;
-      state.askReturnContext = null;
-      state.screen = returnContext.screen;
-      state.pathwayMode = returnContext.pathwayMode;
-      state.editingCondition = returnContext.editingCondition;
-      state.editingEvidenceItem = returnContext.editingEvidenceItem;
-    } else {
-      setScreen(0);
-      return;
-    }
-    render();
-    screenEl.scrollTop = 0;
-    return;
-  }
-
   if (state.pathwayMode) {
     state.pathwayMode = null;
     render();
@@ -392,36 +409,28 @@ function previousScreen() {
 }
 
 function updateShell() {
-  const askNcoActive = isAskNcoOpen();
-  const current = askNcoActive
-    ? "Ask NCO"
-    : state.pathwayMode
+  const current = state.pathwayMode
     ? state.pathwayMode === "submitted"
       ? "After Filing"
       : "Decision Help"
     : screens[state.screen];
   titleEl.textContent = current === "Welcome" ? "ClaimNCO" : current;
-  stepLabelEl.textContent = askNcoActive
-    ? "Guided help"
-    : state.pathwayMode
+  stepLabelEl.textContent = state.pathwayMode
     ? "Different path"
     : `Step ${state.screen + 1} of ${screens.length}`;
-  const progressScreen =
-    askNcoActive && state.askReturnContext ? state.askReturnContext.screen : state.screen;
-  progressEl.style.width = `${((Math.min(progressScreen, screens.length - 1) + 1) / screens.length) * 100}%`;
-  progressShell.hidden = askNcoActive;
-  backButton.disabled = !askNcoActive && state.screen === 0 && !state.pathwayMode;
-  backButton.style.visibility = !askNcoActive && state.screen === 0 && !state.pathwayMode ? "hidden" : "visible";
-  askNcoButton.disabled = askNcoActive;
-  askNcoButton.setAttribute("aria-current", askNcoActive ? "page" : "false");
+  progressEl.style.width = `${((state.screen + 1) / screens.length) * 100}%`;
+  progressShell.hidden = false;
+  backButton.disabled = state.screen === 0 && !state.pathwayMode;
+  backButton.style.visibility = state.screen === 0 && !state.pathwayMode ? "hidden" : "visible";
+  askNcoButton.disabled = false;
+  askNcoButton.setAttribute("aria-current", "false");
 }
 
 function renderMiniMap() {
-  const activeScreen = isAskNcoOpen() && state.askReturnContext ? state.askReturnContext.screen : state.screen;
   miniMap.innerHTML = screens
     .map(
       (screen, index) => `
-        <button class="mini-step ${index === activeScreen ? "active" : ""}" type="button" data-screen="${index}">
+        <button class="mini-step ${index === state.screen ? "active" : ""}" type="button" data-screen="${index}">
           <span>${index + 1}</span>
           <span>${escapeHtml(screen)}</span>
         </button>
@@ -494,7 +503,7 @@ function renderWelcome() {
         <button class="button primary full" type="button" data-next>
           ${icon("arrow-right")} Start readiness check
         </button>
-        <button class="button secondary full" type="button" data-screen-jump="8">
+        <button class="button secondary full" type="button" data-open-ask-nco>
           ${icon("message-circle-question")} Ask NCO
         </button>
         <button class="button secondary full" type="button" data-open-resources>
@@ -611,7 +620,7 @@ function renderStageBranch() {
 
         <div class="actions">
           <button class="button primary full" type="button" data-screen-jump="6">${icon("user-search")} Find VSO/accredited help</button>
-          <button class="button secondary full" type="button" data-screen-jump="8">${icon("message-circle-question")} Ask NCO about this</button>
+          <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about this</button>
           <button class="button secondary full" type="button" data-clear-pathway>${icon("arrow-left")} Back to stage choices</button>
         </div>
       </div>
@@ -676,7 +685,7 @@ function renderStageBranch() {
 
       <div class="actions">
         <button class="button primary full" type="button" data-screen-jump="6">${icon("user-search")} Find VSO/accredited help</button>
-        <button class="button secondary full" type="button" data-screen-jump="8">${icon("message-circle-question")} Ask NCO about this</button>
+        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about this</button>
         <button class="button secondary full" type="button" data-clear-pathway>${icon("arrow-left")} Back to stage choices</button>
       </div>
     </div>
@@ -1280,8 +1289,8 @@ function renderReadiness() {
 
       <div class="actions">
         <button class="button primary full" type="button" data-next>${icon("user-search")} Find trusted help</button>
-        <button class="button secondary full" type="button" data-screen-jump="8">${icon("message-circle-question")} Ask NCO about a situation</button>
-        <button class="button secondary full" type="button" data-screen-jump="3">${icon("plus")} Add another condition</button>
+        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about a situation</button>
+        <button class="button secondary full" type="button" data-add-condition>${icon("plus")} Add another condition</button>
       </div>
 
       ${renderBottomNav("Journey")}
@@ -1325,6 +1334,11 @@ function renderVsoHelp() {
         <button class="button primary full" type="submit">${icon("map-pin")} Use this search area</button>
       </form>
 
+      <div class="notice warning">
+        ${icon("map-pinned")}
+        <p><strong>Local search is not live yet</strong>This prototype saves your ZIP or city for the summary only. Use VA's official representative search below to find current accredited help.</p>
+      </div>
+
       <section class="info-panel">
         <h3>Official VA search</h3>
         <p>Start with VA's official representative tools, then verify accreditation before sharing sensitive information.</p>
@@ -1351,6 +1365,11 @@ function renderVsoHelp() {
                   <div>
                     <h3>${escapeHtml(option.name)}</h3>
                     <p>${escapeHtml(option.note)}</p>
+                    ${
+                      state.vso.savedOption === option.name
+                        ? `<span class="tag neutral">${icon("check")} In summary</span>`
+                        : ""
+                    }
                   </div>
                   <div class="action-row">
                     <a class="button secondary" href="${option.url}" target="_blank" rel="noreferrer">${icon("external-link")} Website</a>
@@ -1472,6 +1491,14 @@ function renderAskNcoActions(scenario) {
         `;
       }
 
+      if (action.screen === 3 && action.icon === "plus") {
+        return `
+          <button class="button secondary" type="button" data-add-condition>
+            ${icon(action.icon)} ${escapeHtml(action.label)}
+          </button>
+        `;
+      }
+
       return `
         <button class="button secondary" type="button" data-screen-jump="${action.screen}">
           ${icon(action.icon)} ${escapeHtml(action.label)}
@@ -1527,46 +1554,80 @@ function renderAskNcoAnswer(scenario) {
         <a href="${escapeHtml(scenario.sourceUrl)}" target="_blank" rel="noreferrer">${escapeHtml(scenario.sourceLabel)}</a>
       </div>
 
-      <div class="action-row">
-        ${renderAskNcoActions(scenario)}
+      <div class="answer-section">
+        <h4>Helpful actions</h4>
+        <div class="action-row">
+          ${renderAskNcoActions(scenario)}
+        </div>
       </div>
     </div>
   `;
 }
 
-function renderAskNco() {
-  return `
-    <div class="screen-stack">
-      <div class="hero-block">
-        <h2>Ask NCO.</h2>
-        <p>Pick the situation closest to yours. This is a guided prototype with prepared answers, not a live AI chat yet.</p>
+function renderAskNcoChoiceButtons() {
+  return askNcoEntryOptions
+    .map(
+      (option) => `
+        <button class="assistant-choice" type="button" data-ask-scenario="${option.scenarioId}">
+          <span>${option.labelHtml}</span>
+          ${icon("chevron-right")}
+        </button>
+      `,
+    )
+    .join("");
+}
+
+function renderAskNcoPanel() {
+  if (!askNcoPanel) return;
+
+  const isOpen = state.askNco.open;
+  askNcoBackdrop.hidden = !isOpen;
+  askNcoPanel.classList.toggle("open", isOpen);
+  askNcoPanel.setAttribute("aria-hidden", isOpen ? "false" : "true");
+
+  if (!isOpen) {
+    askNcoContent.innerHTML = "";
+    hydrateIcons();
+    return;
+  }
+
+  const scenario = askNcoScenarios.find((item) => item.id === state.askNco.scenarioId);
+  askNcoContent.innerHTML = `
+    <div class="assistant-stack">
+      <div class="assistant-prompt">
+        ${icon("message-circle-question")}
+        <div>
+          <h3>Let&rsquo;s get you squared away. Where are you in the VA claim process?</h3>
+          <p>This is guided prototype help with prepared answers, not a live AI chat yet.</p>
+        </div>
       </div>
 
       <div class="notice">
         ${icon("shield-check")}
-        <p><strong>Safety boundary</strong>Ask NCO explains common situations and points to official sources. It is not VA, legal advice, medical advice, or an accredited representative.</p>
+        <p><strong>Safety boundary</strong>Ask ClaimNCO explains common situations and points to official sources. It is not VA, legal advice, medical advice, or an accredited representative.</p>
       </div>
 
-      <section class="ask-nco-layout" aria-label="Ask NCO guided questions">
-        ${askNcoScenarios
-          .map(
-            (scenario) => `
-              <details class="ask-disclosure">
-                <summary>
-                  <span>
-                    <span class="tag neutral">${escapeHtml(scenario.category)}</span>
-                    <strong>${escapeHtml(scenario.title)}</strong>
-                  </span>
-                  ${icon("chevron-down")}
-                </summary>
-                ${renderAskNcoAnswer(scenario)}
-              </details>
-            `,
-          )
-          .join("")}
-      </section>
+      ${
+        scenario
+          ? `
+            <div class="assistant-selected">
+              <div>
+                <span class="tag neutral">${escapeHtml(scenario.category)}</span>
+                <h3>${escapeHtml(scenario.title)}</h3>
+              </div>
+              <button class="button ghost" type="button" data-ask-reset>${icon("rotate-ccw")} Start over</button>
+            </div>
+            ${renderAskNcoAnswer(scenario)}
+          `
+          : `
+            <div class="assistant-options" aria-label="Ask ClaimNCO starting choices">
+              ${renderAskNcoChoiceButtons()}
+            </div>
+          `
+      }
     </div>
   `;
+  hydrateIcons();
 }
 
 function renderBottomNav(active) {
@@ -1608,9 +1669,7 @@ function render() {
   updateShell();
   renderMiniMap();
 
-  if (isAskNcoOpen()) {
-    screenEl.innerHTML = renderAskNco();
-  } else if (state.editingCondition) {
+  if (state.editingCondition) {
     screenEl.innerHTML = renderConditionEditor(state.editingCondition === "new" ? null : currentCondition());
   } else if (state.editingEvidenceItem) {
     screenEl.innerHTML = renderEvidenceItemEditor();
@@ -1630,6 +1689,14 @@ function render() {
   }
 
   hydrateIcons();
+  renderAskNcoPanel();
+}
+
+function closeAskNco() {
+  state.askNco.open = false;
+  state.askNco.scenarioId = null;
+  renderAskNcoPanel();
+  askNcoButton.focus();
 }
 
 function openResources() {
@@ -1693,7 +1760,7 @@ function saveCondition(form) {
   state.selectedConditionId = condition.id;
   state.editingCondition = null;
   render();
-  showToast("Condition saved.");
+  showToast(isNew ? "Condition added." : "Condition saved.");
 }
 
 function saveEvidence(form) {
@@ -1730,6 +1797,17 @@ function saveVsoSearch(form) {
   render();
 }
 
+function openConditionEditor() {
+  state.askNco.open = false;
+  state.askNco.scenarioId = null;
+  state.pathwayMode = null;
+  state.editingEvidenceItem = false;
+  state.screen = 3;
+  state.editingCondition = "new";
+  render();
+  screenEl.scrollTop = 0;
+}
+
 document.addEventListener("click", async (event) => {
   const target = event.target.closest("button, a");
   if (!target) return;
@@ -1754,11 +1832,20 @@ document.addEventListener("click", async (event) => {
     state.pathwayMode = null;
     render();
     screenEl.scrollTop = 0;
+  } else if (target.matches("[data-open-ask-nco]")) {
+    openAskNco();
+  } else if (target.matches("[data-close-ask-nco]")) {
+    closeAskNco();
+  } else if (target.matches("[data-ask-scenario]")) {
+    state.askNco.scenarioId = target.dataset.askScenario;
+    renderAskNcoPanel();
+  } else if (target.matches("[data-ask-reset]")) {
+    state.askNco.scenarioId = null;
+    renderAskNcoPanel();
   } else if (target.matches("[data-open-resources]")) {
     openResources();
   } else if (target.matches("[data-add-condition]")) {
-    state.editingCondition = "new";
-    render();
+    openConditionEditor();
   } else if (target.matches("[data-edit-condition]")) {
     state.selectedConditionId = target.dataset.editCondition;
     state.editingCondition = "existing";
@@ -1780,21 +1867,21 @@ document.addEventListener("click", async (event) => {
     render();
   } else if (target.matches("[data-screen-jump]")) {
     const targetScreen = Number(target.dataset.screenJump);
-    if (targetScreen === ASK_NCO_SCREEN) {
-      openAskNco();
-    } else {
-      state.editingCondition = null;
-      state.editingEvidenceItem = false;
-      state.pathwayMode = null;
-      setScreen(targetScreen);
-    }
+    state.editingCondition = null;
+    state.editingEvidenceItem = false;
+    state.pathwayMode = null;
+    setScreen(targetScreen);
   } else if (target.matches("[data-copy-summary]")) {
-    await navigator.clipboard.writeText(prepSummaryText());
-    showToast("Summary copied.");
+    try {
+      await navigator.clipboard.writeText(prepSummaryText());
+      showToast("Summary copied.");
+    } catch {
+      showToast("Copy is unavailable in this browser. Summary is still on screen.");
+    }
   } else if (target.matches("[data-save-vso]")) {
     state.vso.savedOption = target.dataset.saveVso;
     render();
-    showToast(`${state.vso.savedOption} added to summary.`);
+    showToast(`${state.vso.savedOption} added to VSO prep summary.`);
   }
 });
 
@@ -1829,12 +1916,19 @@ screenEl.addEventListener("change", (event) => {
 });
 
 backButton.addEventListener("click", previousScreen);
-askNcoButton.addEventListener("click", openAskNco);
+askNcoButton.addEventListener("click", () => openAskNco());
 resourcesButton.addEventListener("click", openResources);
 closeResourcesButton.addEventListener("click", closeResources);
 drawerBackdrop.addEventListener("click", closeResources);
+closeAskNcoButton.addEventListener("click", closeAskNco);
+askNcoBackdrop.addEventListener("click", closeAskNco);
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.askNco.open) {
+    closeAskNco();
+    return;
+  }
+
   if (event.key === "Escape" && drawer.classList.contains("open")) {
     closeResources();
   }
@@ -1847,11 +1941,7 @@ miniMap.addEventListener("click", (event) => {
   state.editingEvidenceItem = false;
   state.pathwayMode = null;
   const targetScreen = Number(button.dataset.screen);
-  if (targetScreen === ASK_NCO_SCREEN) {
-    openAskNco();
-  } else {
-    setScreen(targetScreen);
-  }
+  setScreen(targetScreen);
 });
 
 renderResources();

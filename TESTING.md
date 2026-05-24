@@ -58,10 +58,10 @@ Goal: Confirm the main flow makes sense from start to finish.
     - evidence status,
     - questions to ask.
 15. Open `Ask NCO`.
-16. Select at least three scenarios, including one urgent or post-decision scenario.
-17. Confirm each answer includes a plain answer, next step, things to check, VSO question, and source or routing note.
-18. Confirm the header `Ask NCO` button is reachable from every main flow screen.
-19. Confirm Ask NCO says `Guided help`, not `Step 9 of 9`, and does not appear as a numbered flow step.
+16. Confirm it opens as a guided assistant panel, not a numbered flow page.
+17. Select at least three choices, including one post-decision or uncertain scenario.
+18. Confirm each answer includes a plain answer, next step, things to check, VSO question, and source or routing note.
+19. Confirm the header `Ask NCO` button is reachable from every main flow screen.
 
 ## PWA Self-Test
 
@@ -95,14 +95,14 @@ Use this to confirm users are not forced into the wrong flow.
 Use this to confirm the guided assistant feels helpful without pretending to be live AI.
 
 1. Open `Ask NCO` from the welcome screen or header button.
-2. Confirm the screen says this is a guided prototype with prepared answers, not a live AI chat yet.
-3. Confirm the header label says `Guided help` instead of a numbered step.
-4. Select `I am thinking about filing, but I am not ready.`
+2. Confirm the panel asks `Let's get you squared away. Where are you in the VA claim process?`
+3. Confirm the panel shows the eight starting choices from thinking about filing through not sure.
+4. Select `I'm thinking about filing`.
 5. Confirm the answer explains Intent to File and links to an official VA source.
-6. Select `I missed a C&P exam.`
-7. Confirm the answer feels urgent and routes toward VSO/accredited help.
-8. Select `A condition was denied.`
-9. Confirm the answer does not choose a review strategy or promise an outcome.
+6. Select `Start over`.
+7. Select `I got a decision`.
+8. Confirm the answer does not choose a review strategy, predict an outcome, or promise a result.
+9. Confirm closing the panel returns the user to the same screen.
 
 ## What To Look For
 

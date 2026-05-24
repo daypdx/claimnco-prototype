@@ -60,7 +60,7 @@ The prototype now includes a dedicated VSO Help screen based on the updated rese
 
 ## v0.3 Addition
 
-The prototype now includes `Ask NCO`, a guided scenario helper available from the app header throughout the flow. It is separate from the numbered readiness flow and shows as guided help, not a required step. It uses prepared, source-backed answer cards instead of open AI chat. Each answer includes:
+The prototype now includes `Ask ClaimNCO`, a guided bottom-sheet assistant available from the app header throughout the flow. It is separate from the numbered readiness flow and uses prepared, source-backed answer cards instead of open AI chat. Each answer includes:
 
 - a plain answer,
 - why it matters,
