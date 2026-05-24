@@ -1156,7 +1156,66 @@ function nextAction(condition) {
   return "Review with accredited help";
 }
 
+function readinessPriority(condition) {
+  if (condition.evidence.current === "Not sure") {
+    return {
+      rank: 0,
+      label: "Review first",
+      tone: "alert",
+      reason: "Current medical evidence is unclear.",
+    };
+  }
+
+  if (condition.evidence.service === "Not sure") {
+    return {
+      rank: 1,
+      label: "Review first",
+      tone: "alert",
+      reason: "Service event or record support is unclear.",
+    };
+  }
+
+  if (condition.evidence.lay === "Need to request it") {
+    return {
+      rank: 2,
+      label: "Needs follow-up",
+      tone: "caution",
+      reason: "A lay or buddy statement may still need to be requested.",
+    };
+  }
+
+  if (condition.evidence.severity !== "Have it") {
+    return {
+      rank: 3,
+      label: "Needs follow-up",
+      tone: "caution",
+      reason: "Symptom impact notes may still need review.",
+    };
+  }
+
+  return {
+    rank: 4,
+    label: "Organized",
+    tone: "neutral",
+    reason: "This looks organized enough to review with accredited help.",
+  };
+}
+
+function sortedReadinessConditions() {
+  return [...state.conditions].sort((a, b) => {
+    const aPriority = readinessPriority(a);
+    const bPriority = readinessPriority(b);
+    if (aPriority.rank !== bPriority.rank) return aPriority.rank - bPriority.rank;
+
+    const aCounts = evidenceCounts(a);
+    const bCounts = evidenceCounts(b);
+    return bCounts.unsure + bCounts.review - (aCounts.unsure + aCounts.review);
+  });
+}
+
 function renderReadiness() {
+  const readinessConditions = sortedReadinessConditions();
+
   return `
     <div class="screen-stack">
       <div class="hero-block">
@@ -1169,19 +1228,26 @@ function renderReadiness() {
         <p><strong>Ready for a better conversation</strong>Your information is organized enough to start a productive VSO or accredited representative conversation.</p>
       </div>
 
+      <div class="notice warning">
+        ${icon("list-filter")}
+        <p><strong>Review first</strong>Claim areas with the clearest gaps appear at the top so important follow-up is not buried.</p>
+      </div>
+
       <div class="card-list">
-        ${state.conditions
+        ${readinessConditions
           .map((condition) => {
             const counts = evidenceCounts(condition);
+            const priority = readinessPriority(condition);
             return `
-              <article class="condition-card">
+              <article class="condition-card readiness-card ${priority.tone === "alert" ? "review-first" : ""}">
                 <div class="condition-head">
                   <div>
                     <h3>${escapeHtml(condition.name)}</h3>
                     <p>Evidence: ${counts.have} have / ${counts.unsure} not sure</p>
                   </div>
-                  <span class="tag caution">${nextAction(condition)}</span>
+                  <span class="tag ${priority.tone}">${escapeHtml(priority.label)}</span>
                 </div>
+                <p><strong>${nextAction(condition)}.</strong> ${escapeHtml(priority.reason)}</p>
               </article>
             `;
           })

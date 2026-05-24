@@ -43,6 +43,7 @@ Goal: Confirm the main flow makes sense from start to finish.
 6. Open the evidence checklist.
 7. Change at least one evidence status.
 8. Continue to the readiness dashboard.
+   - Confirm conditions with the clearest evidence gaps appear at the top under `Review first`.
 9. Open the VSO Help screen.
 10. Enter a fake ZIP code, such as `97201`.
 11. Click `Use this search area`.

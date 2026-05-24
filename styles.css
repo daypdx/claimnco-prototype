@@ -462,6 +462,17 @@ a {
   gap: 12px;
 }
 
+.condition-card.review-first {
+  border-color: #d5969a;
+  background: #fff8f8;
+}
+
+.readiness-card p strong {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ink);
+}
+
 .vso-card {
   display: grid;
   gap: 12px;
@@ -574,6 +585,11 @@ a {
 .tag.caution {
   color: #653813;
   background: #f3e1bd;
+}
+
+.tag.alert {
+  color: var(--danger);
+  background: #f8e3e4;
 }
 
 .tag.neutral {
