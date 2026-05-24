@@ -35,7 +35,7 @@ Goal: Confirm the main flow makes sense from start to finish.
    - `I have not started yet`
    - `I am gathering evidence`
    - `I am not sure`
-   - To test branch behavior separately, choose `I already submitted a claim` or `I got a decision`
+   - `I already submitted a claim` or `I got a decision` should still continue into the prototype basics flow; Ask ClaimNCO handles those situational explanations.
 4. Continue through `Claim Basics`.
    - If VA.gov access is `No` or `I need help with sign-in`, expand the VA.gov sign-in guide sections.
    - Confirm the guide explains what each sign-in item is, what the user may need, and where to go.
@@ -57,11 +57,11 @@ Goal: Confirm the main flow makes sense from start to finish.
     - conditions,
     - evidence status,
     - questions to ask.
-15. Open `Ask NCO`.
+15. Open `Ask ClaimNCO`.
 16. Confirm it opens as a guided assistant panel, not a numbered flow page.
 17. Select at least three choices, including one post-decision or uncertain scenario.
 18. Confirm each answer includes a plain answer, next step, things to check, VSO question, and source or routing note.
-19. Confirm the header `Ask NCO` button is reachable from every main flow screen.
+19. Confirm the header `Ask ClaimNCO` button is reachable from every main flow screen.
 
 ## PWA Self-Test
 
@@ -74,27 +74,37 @@ Use this to confirm the prototype can be tested like an app.
 5. Confirm it opens without the normal browser address bar.
 6. Confirm the app title and icon show as `ClaimNCO`.
 
-## Branch Self-Test
+## Interaction Reliability Self-Test
 
-Use this to confirm users are not forced into the wrong flow.
+Use this to confirm every primary tap does something obvious.
 
 1. Restart or refresh the prototype.
 2. Click `Start readiness check`.
-3. Select `I already submitted a claim`.
+3. Confirm the app advances from `Welcome` to `Stage`.
 4. Click `Continue`.
-5. Confirm you see an `After Filing` page with claim status and C&P exam resources.
-6. Confirm the page asks whether VA is waiting on the veteran, or the veteran is waiting on VA.
-7. Go back to stage choices.
-8. Select `I got a decision`.
-9. Click `Continue`.
-10. Confirm you see a `Decision Help` page with decision review and accredited-help resources.
-11. Confirm the page says the decision letter controls and gives points to bring to accredited help.
+5. Confirm the app advances from `Stage` to `Basics`.
+6. Continue to `Conditions`.
+7. Click `Add another condition`.
+8. Confirm a mock condition form opens.
+9. Save the mock condition with fake text, or leave it blank to test the `Untitled condition` fallback, and confirm a visible toast says the condition was added.
+10. Continue to `Evidence`.
+11. Click `Add evidence item name`.
+12. Confirm a mock evidence item form opens.
+13. Save the mock evidence item with fake text, or leave it blank to test the `Untitled evidence item` fallback, and confirm a visible toast says the item was added.
+14. Click `Next: Readiness`.
+15. Click `Find trusted help`.
+16. Enter a fake ZIP code or city/state and click `Use this search area`.
+17. Confirm a visible toast says the search area was saved.
+18. Click `Use in summary` for one VSO option.
+19. Confirm a visible toast appears and the final summary includes that VSO option.
+20. Click `Generate VSO prep summary`, then `Copy summary`.
+21. Confirm a visible copy feedback message appears.
 
-## Ask NCO Self-Test
+## Ask ClaimNCO Self-Test
 
 Use this to confirm the guided assistant feels helpful without pretending to be live AI.
 
-1. Open `Ask NCO` from the welcome screen or header button.
+1. Open `Ask ClaimNCO` from the welcome screen or header button.
 2. Confirm the panel asks `Let's get you squared away. Where are you in the VA claim process?`
 3. Confirm the panel shows the eight starting choices from thinking about filing through not sure.
 4. Select `I'm thinking about filing`.
@@ -111,7 +121,7 @@ While testing, ask:
 - Does the prototype answer the north-star questions?
 - Do I understand what the app is for within the first minute?
 - Does the app feel calming or overwhelming?
-- Does Ask NCO feel like a guided helper instead of unsafe open-ended AI advice?
+- Does Ask ClaimNCO feel like a guided helper instead of unsafe open-ended AI advice?
 - Could a newly separated 20-year-old use this without already knowing civilian paperwork systems?
 - Could an older veteran using only a phone follow this without tiny controls or confusing labels?
 - Does the app provide structure without making the user feel like they have failed or been assigned a long chore list?
@@ -160,7 +170,7 @@ The prototype is working if a tester can:
 - identify at least one evidence gap,
 - understand why accredited help matters,
 - generate a useful VSO prep summary,
-- use Ask NCO to understand a situation without mistaking it for official or legal advice,
+- use Ask ClaimNCO to understand a situation without mistaking it for official or legal advice,
 - feel less lost than when they started,
 - complete the flow after choosing `Not sure` more than once,
 - use the main screens on a phone without getting stuck,

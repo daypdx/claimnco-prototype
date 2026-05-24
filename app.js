@@ -504,7 +504,7 @@ function renderWelcome() {
           ${icon("arrow-right")} Start readiness check
         </button>
         <button class="button secondary full" type="button" data-open-ask-nco>
-          ${icon("message-circle-question")} Ask NCO
+          ${icon("message-circle-question")} Ask ClaimNCO
         </button>
         <button class="button secondary full" type="button" data-open-resources>
           ${icon("book-open")} View official VA resources
@@ -620,7 +620,7 @@ function renderStageBranch() {
 
         <div class="actions">
           <button class="button primary full" type="button" data-screen-jump="6">${icon("user-search")} Find VSO/accredited help</button>
-          <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about this</button>
+          <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask ClaimNCO about this</button>
           <button class="button secondary full" type="button" data-clear-pathway>${icon("arrow-left")} Back to stage choices</button>
         </div>
       </div>
@@ -685,7 +685,7 @@ function renderStageBranch() {
 
       <div class="actions">
         <button class="button primary full" type="button" data-screen-jump="6">${icon("user-search")} Find VSO/accredited help</button>
-        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about this</button>
+        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask ClaimNCO about this</button>
         <button class="button secondary full" type="button" data-clear-pathway>${icon("arrow-left")} Back to stage choices</button>
       </div>
     </div>
@@ -936,7 +936,7 @@ function renderConditionEditor(condition = null) {
       <form class="form-grid" data-condition-form data-condition-id="${draft.id}" data-new="${isNew}">
         <div class="field">
           <label for="conditionName">Condition or symptom area</label>
-          <input id="conditionName" name="name" value="${escapeHtml(draft.name)}" placeholder="Back pain" required>
+          <input id="conditionName" name="name" value="${escapeHtml(draft.name)}" placeholder="Back pain">
         </div>
 
         <fieldset class="field">
@@ -1099,7 +1099,7 @@ function renderEvidenceItemEditor() {
       <form class="form-grid" data-evidence-item-form data-condition-id="${condition.id}">
         <div class="field">
           <label for="evidenceTitle">Evidence name</label>
-          <input id="evidenceTitle" name="title" placeholder="Clinic record, test result, or buddy statement" required>
+          <input id="evidenceTitle" name="title" placeholder="Clinic record, test result, or buddy statement">
         </div>
 
         <fieldset class="field">
@@ -1289,7 +1289,7 @@ function renderReadiness() {
 
       <div class="actions">
         <button class="button primary full" type="button" data-next>${icon("user-search")} Find trusted help</button>
-        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about a situation</button>
+        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask ClaimNCO about a situation</button>
         <button class="button secondary full" type="button" data-add-condition>${icon("plus")} Add another condition</button>
       </div>
 
@@ -1564,6 +1564,27 @@ function renderAskNcoAnswer(scenario) {
   `;
 }
 
+function renderAskNcoComingSoon() {
+  return `
+    <div class="ask-answer-card">
+      <div class="answer-section">
+        <h4>Prototype answer coming soon</h4>
+        <p>This choice is not built out yet. For testing, use the official VA resources and bring unclear or time-sensitive questions to a VSO or VA-accredited representative.</p>
+      </div>
+
+      <div class="notice warning">
+        ${icon("shield-alert")}
+        <p><strong>Safety boundary</strong>This prototype does not give legal advice, medical advice, rating predictions, filing guarantees, or official VA decisions.</p>
+      </div>
+
+      <div class="action-row">
+        <button class="button secondary" type="button" data-ask-reset>${icon("rotate-ccw")} Start over</button>
+        <button class="button secondary" type="button" data-screen-jump="6">${icon("user-search")} Find accredited help</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderAskNcoChoiceButtons() {
   return askNcoEntryOptions
     .map(
@@ -1591,6 +1612,7 @@ function renderAskNcoPanel() {
     return;
   }
 
+  const hasScenarioChoice = Boolean(state.askNco.scenarioId);
   const scenario = askNcoScenarios.find((item) => item.id === state.askNco.scenarioId);
   askNcoContent.innerHTML = `
     <div class="assistant-stack">
@@ -1608,16 +1630,16 @@ function renderAskNcoPanel() {
       </div>
 
       ${
-        scenario
+        hasScenarioChoice
           ? `
             <div class="assistant-selected">
               <div>
-                <span class="tag neutral">${escapeHtml(scenario.category)}</span>
-                <h3>${escapeHtml(scenario.title)}</h3>
+                <span class="tag neutral">${escapeHtml(scenario?.category || "Prototype")}</span>
+                <h3>${escapeHtml(scenario?.title || "This answer is not built yet.")}</h3>
               </div>
               <button class="button ghost" type="button" data-ask-reset>${icon("rotate-ccw")} Start over</button>
             </div>
-            ${renderAskNcoAnswer(scenario)}
+            ${scenario ? renderAskNcoAnswer(scenario) : renderAskNcoComingSoon()}
           `
           : `
             <div class="assistant-options" aria-label="Ask ClaimNCO starting choices">
@@ -1718,6 +1740,8 @@ function showToast(message) {
   if (existing) existing.remove();
   const toast = document.createElement("div");
   toast.className = "toast";
+  toast.setAttribute("role", "status");
+  toast.setAttribute("aria-live", "polite");
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 2600);
@@ -1819,13 +1843,7 @@ document.addEventListener("click", async (event) => {
     }
     setScreen(5);
   } else if (target.matches("[data-stage-continue]")) {
-    if (state.stage === "submitted" || state.stage === "decision") {
-      state.pathwayMode = state.stage;
-      render();
-      screenEl.scrollTop = 0;
-    } else {
-      nextScreen();
-    }
+    nextScreen();
   } else if (target.matches("[data-next]")) {
     nextScreen();
   } else if (target.matches("[data-clear-pathway]")) {
