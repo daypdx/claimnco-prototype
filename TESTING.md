@@ -85,13 +85,13 @@ Use this to confirm every primary tap does something obvious.
 5. Confirm the app advances from `Stage` to `Basics`.
 6. Continue to `Conditions`.
 7. Click `Add another condition`.
-8. Confirm a mock condition form opens.
+8. Confirm a simple mock condition form opens with condition name and optional symptoms/notes.
 9. Save the mock condition with fake text, or leave it blank to test the `Untitled condition` fallback, and confirm a visible toast says the condition was added.
 10. Continue to `Evidence`.
 11. Click `Add evidence item name`.
 12. Confirm a mock evidence item form opens.
 13. Confirm the optional photo/camera picker is a native file picker and says selected images are not uploaded or stored.
-14. Save the mock evidence item with fake text, or leave it blank to test the `Untitled evidence item` fallback, and confirm a visible toast says the item was added.
+14. Save the mock evidence item with fake text, or leave it blank to test the `Untitled evidence item` fallback, and confirm a visible toast says `Evidence item saved. No document uploaded.`
 15. Click `Next: Readiness`.
 16. Click `Find trusted help`.
 17. Enter a fake ZIP code or city/state and click `Use this search area`.

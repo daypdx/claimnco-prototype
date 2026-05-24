@@ -925,15 +925,19 @@ function renderConditionEditor(condition = null) {
     },
     items: [],
   };
+  const conditionFields = isNew
+    ? `
+        <div class="field">
+          <label for="conditionName">Condition name</label>
+          <input id="conditionName" name="name" value="${escapeHtml(draft.name)}" placeholder="Back pain">
+        </div>
 
-  return `
-    <div class="screen-stack">
-      <div class="hero-block">
-        <h2>${isNew ? "Add a condition." : "Edit condition."}</h2>
-        <p>You do not need perfect VA wording yet. Capture what you know.</p>
-      </div>
-
-      <form class="form-grid" data-condition-form data-condition-id="${draft.id}" data-new="${isNew}">
+        <div class="field">
+          <label for="conditionNotes">Optional symptoms/notes</label>
+          <textarea id="conditionNotes" name="symptoms" placeholder="Pain, ringing, sleep issues, when it started, or what makes it worse">${escapeHtml(draft.symptoms)}</textarea>
+        </div>
+      `
+    : `
         <div class="field">
           <label for="conditionName">Condition or symptom area</label>
           <input id="conditionName" name="name" value="${escapeHtml(draft.name)}" placeholder="Back pain">
@@ -969,6 +973,17 @@ function renderConditionEditor(condition = null) {
           <label for="impact">How does it affect daily life or work?</label>
           <textarea id="impact" name="impact" placeholder="Work limits, sleep, mobility, focus, daily activities">${escapeHtml(draft.impact)}</textarea>
         </div>
+      `;
+
+  return `
+    <div class="screen-stack">
+      <div class="hero-block">
+        <h2>${isNew ? "Add a condition." : "Edit condition."}</h2>
+        <p>${isNew ? "Use plain words. You can add details later." : "You do not need perfect VA wording yet. Capture what you know."}</p>
+      </div>
+
+      <form class="form-grid" data-condition-form data-condition-id="${draft.id}" data-new="${isNew}">
+        ${conditionFields}
 
         <div class="actions">
           <button class="button primary full" type="submit">${icon("save")} Save condition</button>
@@ -1101,7 +1116,7 @@ function renderEvidenceItemEditor() {
         <div class="field">
           <label for="evidencePhoto">Optional photo/camera picker</label>
           <input id="evidencePhoto" name="photo" type="file" accept="image/*" capture="environment">
-          <small>Prototype only. The selected image is not uploaded, stored, or added to the summary.</small>
+          <small>Prototype only. The selected image is not uploaded to VA, stored, or added to the summary.</small>
         </div>
 
         <div class="notice warning">
@@ -1780,7 +1795,7 @@ function saveEvidenceItem(form) {
   });
   state.editingEvidenceItem = false;
   render();
-  showToast("Evidence item added.");
+  showToast("Evidence item saved. No document uploaded.");
 }
 
 function saveVsoSearch(form) {
@@ -1861,7 +1876,7 @@ document.addEventListener("click", async (event) => {
   } else if (target.matches("[data-copy-summary]")) {
     try {
       await navigator.clipboard.writeText(prepSummaryText());
-      showToast("Summary copied.");
+      showToast("Summary copied");
     } catch {
       showToast("Copy is unavailable in this browser. Summary is still on screen.");
     }
