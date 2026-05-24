@@ -22,6 +22,14 @@ Open `index.html` in a browser. The prototype uses sample data only and does not
 - run a full legal workflow,
 - provide legal or medical advice.
 
+Live prototype:
+
+- https://daypdx.github.io/claimnco-prototype/
+
+## Personal PWA Testing
+
+The GitHub Pages version is installable as a basic Progressive Web App. On iPhone, open the live prototype in Safari, tap Share, then choose `Add to Home Screen`. On Android Chrome, open the live prototype and choose `Install app` or `Add to Home screen`.
+
 The goal is to test the first flow:
 
 1. Welcome

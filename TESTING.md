@@ -12,7 +12,11 @@ North star:
 
 Prototype file:
 
-- `prototype/index.html`
+- `index.html`
+
+Live PWA test link:
+
+- https://daypdx.github.io/claimnco-prototype/
 
 Important:
 
@@ -25,7 +29,7 @@ Important:
 
 Goal: Confirm the main flow makes sense from start to finish.
 
-1. Open `prototype/index.html` in your browser.
+1. Open `index.html` in your browser or use the live PWA test link.
 2. Click `Start readiness check`.
 3. On the stage screen, choose one:
    - `I have not started yet`
@@ -57,6 +61,17 @@ Goal: Confirm the main flow makes sense from start to finish.
 17. Confirm each answer includes a plain answer, next step, things to check, VSO question, and source or routing note.
 18. Confirm the header `Ask NCO` button is reachable from every main flow screen.
 19. Confirm Ask NCO says `Guided help`, not `Step 9 of 9`, and does not appear as a numbered flow step.
+
+## PWA Self-Test
+
+Use this to confirm the prototype can be tested like an app.
+
+1. Open `https://daypdx.github.io/claimnco-prototype/`.
+2. On iPhone Safari, tap Share, then `Add to Home Screen`.
+3. On Android Chrome, open the browser menu, then choose `Install app` or `Add to Home screen`.
+4. Launch `ClaimNCO` from the home screen.
+5. Confirm it opens without the normal browser address bar.
+6. Confirm the app title and icon show as `ClaimNCO`.
 
 ## Branch Self-Test
 
