@@ -112,7 +112,9 @@ Use this to confirm the guided assistant feels helpful without pretending to be 
 6. Select `Start over`.
 7. Select `I got a decision`.
 8. Confirm the answer does not choose a review strategy, predict an outcome, or promise a result.
-9. Confirm closing the panel returns the user to the same screen.
+9. Scroll the answer content down and back up.
+10. Confirm the `Close Ask ClaimNCO` button stays visible while the answer content scrolls.
+11. Confirm closing the panel returns the user to the same screen.
 
 ## What To Look For
 

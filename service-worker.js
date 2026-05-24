@@ -1,4 +1,4 @@
-const CACHE_NAME = "claimnco-prototype-v5";
+const CACHE_NAME = "claimnco-prototype-v6";
 
 const APP_SHELL = [
   "./",

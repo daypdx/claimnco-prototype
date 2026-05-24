@@ -1605,6 +1605,7 @@ function renderAskNcoPanel() {
   askNcoBackdrop.hidden = !isOpen;
   askNcoPanel.classList.toggle("open", isOpen);
   askNcoPanel.setAttribute("aria-hidden", isOpen ? "false" : "true");
+  document.body.classList.toggle("assistant-open", isOpen);
 
   if (!isOpen) {
     askNcoContent.innerHTML = "";
@@ -1649,6 +1650,7 @@ function renderAskNcoPanel() {
       }
     </div>
   `;
+  askNcoContent.scrollTop = 0;
   hydrateIcons();
 }
 
