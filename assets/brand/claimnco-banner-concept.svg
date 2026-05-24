@@ -1,0 +1,37 @@
+<svg width="1600" height="600" viewBox="0 0 1600 600" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ClaimNCO First Sergeant Chevron Banner Concept</title>
+  <desc id="desc">A banner with a First Sergeant rank-structure inspired chevron checklist icon and the ClaimNCO tagline.</desc>
+
+  <rect width="1600" height="600" rx="48" fill="#0B172A"/>
+  <circle cx="306" cy="300" r="210" fill="#10233F" stroke="#223B5F" stroke-width="7"/>
+
+  <!-- Icon symbol scaled down: three chevrons, three rockers, diamond/checklist -->
+  <g transform="translate(116 96) scale(0.37)">
+    <g stroke="#C9A45C" stroke-width="58" stroke-linecap="square" stroke-linejoin="miter">
+      <path d="M266 282 L512 150 L758 282"/>
+      <path d="M286 386 L512 264 L738 386"/>
+      <path d="M306 490 L512 378 L718 490"/>
+    </g>
+    <g stroke="#C9A45C" stroke-width="58" stroke-linecap="square" fill="none">
+      <path d="M300 610 Q512 742 724 610"/>
+      <path d="M282 706 Q512 846 742 706"/>
+      <path d="M264 802 Q512 946 760 802"/>
+    </g>
+    <path d="M512 421 L626 535 L512 649 L398 535 Z" fill="#0B172A" stroke="#E8D7AF" stroke-width="18"/>
+    <g transform="translate(457 457)">
+      <rect x="0" y="0" width="110" height="142" rx="13" fill="#F5F0E6"/>
+      <path d="M78 0 L110 32 L85 32 C81.134 32 78 28.866 78 25 Z" fill="#DDD0B4"/>
+      <path d="M24 43 L35 54 L56 30" stroke="#2F5D50" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="64" y="39" width="26" height="8" rx="4" fill="#2F5D50" opacity="0.72"/>
+      <path d="M24 91 L35 102 L56 78" stroke="#2F5D50" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="64" y="87" width="26" height="8" rx="4" fill="#2F5D50" opacity="0.72"/>
+    </g>
+  </g>
+
+  <text x="590" y="260" fill="#F5F0E6" font-family="Inter, SF Pro Display, Arial, sans-serif" font-size="108" font-weight="800" letter-spacing="-2">ClaimNCO</text>
+  <text x="594" y="350" fill="#C9A45C" font-family="Inter, SF Pro Display, Arial, sans-serif" font-size="48" font-weight="650">Get your VA claim squared away.</text>
+  <text x="596" y="414" fill="#B8C2D6" font-family="Inter, SF Pro Text, Arial, sans-serif" font-size="27" font-weight="400">
+    <tspan x="596" dy="0">VA disability claim guidance, evidence organization,</tspan>
+    <tspan x="596" dy="40">reminders, and VSO prep.</tspan>
+  </text>
+</svg>

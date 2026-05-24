@@ -1,0 +1,34 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ClaimNCO First Sergeant Chevron Icon Concept</title>
+  <desc id="desc">A First Sergeant rank-structure inspired mark with three chevrons, three rockers, a center diamond, and a checklist document for the ClaimNCO app.</desc>
+
+  <rect width="1024" height="1024" rx="224" fill="#0B172A"/>
+  <circle cx="512" cy="512" r="392" fill="#10233F" stroke="#223B5F" stroke-width="10"/>
+
+  <!-- First Sergeant structure: three chevrons up top -->
+  <g stroke="#C9A45C" stroke-width="58" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M266 282 L512 150 L758 282"/>
+    <path d="M286 386 L512 264 L738 386"/>
+    <path d="M306 490 L512 378 L718 490"/>
+  </g>
+
+  <!-- First Sergeant structure: three rockers below -->
+  <g stroke="#C9A45C" stroke-width="58" stroke-linecap="square" fill="none">
+    <path d="M300 610 Q512 742 724 610"/>
+    <path d="M282 706 Q512 846 742 706"/>
+    <path d="M264 802 Q512 946 760 802"/>
+  </g>
+
+  <!-- Center diamond -->
+  <path d="M512 421 L626 535 L512 649 L398 535 Z" fill="#0B172A" stroke="#E8D7AF" stroke-width="18"/>
+
+  <!-- Checklist document inside the diamond -->
+  <g transform="translate(457 457)">
+    <rect x="0" y="0" width="110" height="142" rx="13" fill="#F5F0E6"/>
+    <path d="M78 0 L110 32 L85 32 C81.134 32 78 28.866 78 25 Z" fill="#DDD0B4"/>
+    <path d="M24 43 L35 54 L56 30" stroke="#2F5D50" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="64" y="39" width="26" height="8" rx="4" fill="#2F5D50" opacity="0.72"/>
+    <path d="M24 91 L35 102 L56 78" stroke="#2F5D50" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="64" y="87" width="26" height="8" rx="4" fill="#2F5D50" opacity="0.72"/>
+  </g>
+</svg>

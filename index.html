@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ClaimNCO - Get your VA claim squared away.</title>
+    <link rel="icon" href="./assets/brand/claimnco-icon-concept.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <main class="shell" aria-label="ClaimNCO prototype">
+      <section class="phone" aria-live="polite">
+        <header class="topbar">
+          <button class="icon-button" id="backButton" type="button" aria-label="Back">
+            <i data-lucide="arrow-left"></i>
+          </button>
+          <div class="topbar-title">
+            <p class="eyebrow" id="stepLabel">Prototype</p>
+            <h1 id="screenTitle">ClaimNCO</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="ask-nco-access" id="askNcoButton" type="button" aria-label="Ask NCO" title="Ask NCO">
+              <i data-lucide="message-circle-question"></i>
+              <span>Ask NCO</span>
+            </button>
+            <button class="icon-button" id="resourcesButton" type="button" aria-label="Official VA resources">
+              <i data-lucide="book-open"></i>
+            </button>
+          </div>
+        </header>
+
+        <div class="progress-shell" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <section class="screen" id="screen"></section>
+      </section>
+
+      <aside class="companion-panel" aria-label="Prototype notes">
+        <p class="eyebrow">Prototype scope</p>
+        <h2>First-time filer MVP</h2>
+        <p>
+          This click-through uses sample data only. It does not submit claims, store documents,
+          predict ratings, or replace VA.gov or accredited help.
+        </p>
+        <div class="mini-map" id="miniMap"></div>
+      </aside>
+    </main>
+
+    <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+    <aside class="resource-drawer" id="resourceDrawer" aria-label="Official VA resources" aria-hidden="true">
+      <div class="drawer-header">
+        <div>
+          <p class="eyebrow">Official links</p>
+          <h2>VA Resources</h2>
+        </div>
+        <button class="icon-button" id="closeResourcesButton" type="button" aria-label="Close resources">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="resource-list" id="resourceList"></div>
+      <p class="source-note">Source list last checked: May 23, 2026.</p>
+    </aside>
+  </body>
+</html>
