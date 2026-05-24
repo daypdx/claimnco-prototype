@@ -504,7 +504,7 @@ function renderWelcome() {
           ${icon("arrow-right")} Start readiness check
         </button>
         <button class="button secondary full" type="button" data-open-ask-nco>
-          ${icon("message-circle-question")} Ask ClaimNCO
+          ${icon("message-circle-question")} Ask NCO
         </button>
         <button class="button secondary full" type="button" data-open-resources>
           ${icon("book-open")} View official VA resources
@@ -620,7 +620,7 @@ function renderStageBranch() {
 
         <div class="actions">
           <button class="button primary full" type="button" data-screen-jump="6">${icon("user-search")} Find VSO/accredited help</button>
-          <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask ClaimNCO about this</button>
+          <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about this</button>
           <button class="button secondary full" type="button" data-clear-pathway>${icon("arrow-left")} Back to stage choices</button>
         </div>
       </div>
@@ -685,7 +685,7 @@ function renderStageBranch() {
 
       <div class="actions">
         <button class="button primary full" type="button" data-screen-jump="6">${icon("user-search")} Find VSO/accredited help</button>
-        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask ClaimNCO about this</button>
+        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about this</button>
         <button class="button secondary full" type="button" data-clear-pathway>${icon("arrow-left")} Back to stage choices</button>
       </div>
     </div>
@@ -1074,11 +1074,7 @@ function renderEvidenceItems(condition) {
           (item) => `
             <article class="summary-card">
               <h3>${escapeHtml(item.title)}</h3>
-              <dl class="definition-grid">
-                <div class="definition-row"><dt>Category</dt><dd>${escapeHtml(item.category)}</dd></div>
-                <div class="definition-row"><dt>Status</dt><dd>${escapeHtml(item.status)}</dd></div>
-                <div class="definition-row"><dt>Location</dt><dd>${escapeHtml(item.location || "Not listed")}</dd></div>
-              </dl>
+              <p>Name saved for organization only. No file, photo, or sensitive record is stored.</p>
             </article>
           `,
         )
@@ -1093,54 +1089,28 @@ function renderEvidenceItemEditor() {
     <div class="screen-stack">
       <div class="hero-block">
         <h2>Add evidence item.</h2>
-        <p>Add a name and status only. Keep actual records out of this prototype.</p>
+        <p>Add a record name only. Keep actual records and sensitive details out of this prototype.</p>
       </div>
 
       <form class="form-grid" data-evidence-item-form data-condition-id="${condition.id}">
         <div class="field">
-          <label for="evidenceTitle">Evidence name</label>
+          <label for="evidenceTitle">Evidence item name</label>
           <input id="evidenceTitle" name="title" placeholder="Clinic record, test result, or buddy statement">
         </div>
 
-        <fieldset class="field">
-          <legend>Category</legend>
-          <div class="option-group">
-            ${["Medical record", "Service record", "Lay/buddy statement", "Test or imaging", "VA letter/notice", "Other"]
-              .map(
-                (option) => `
-                  <label class="option-card">
-                    <input type="radio" name="category" value="${option}" ${option === "Medical record" ? "checked" : ""}>
-                    <span>${option}</span>
-                  </label>
-                `,
-              )
-              .join("")}
-          </div>
-        </fieldset>
-
-        <fieldset class="field">
-          <legend>Status</legend>
-          <div class="option-group">
-            ${["Have it", "Need to request it", "VA may have it", "Not sure"]
-              .map(
-                (option) => `
-                  <label class="option-card">
-                    <input type="radio" name="status" value="${option}" ${option === "Have it" ? "checked" : ""}>
-                    <span>${option}</span>
-                  </label>
-                `,
-              )
-              .join("")}
-          </div>
-        </fieldset>
-
         <div class="field">
-          <label for="location">Where is it?</label>
-          <input id="location" name="location" placeholder="Private clinic portal">
+          <label for="evidencePhoto">Optional photo/camera picker</label>
+          <input id="evidencePhoto" name="photo" type="file" accept="image/*" capture="environment">
+          <small>Prototype only. The selected image is not uploaded, stored, or added to the summary.</small>
+        </div>
+
+        <div class="notice warning">
+          ${icon("lock")}
+          <p><strong>No sensitive uploads</strong>Do not select SSNs, claim numbers, banking information, full medical records, or other private documents in this prototype.</p>
         </div>
 
         <div class="actions">
-          <button class="button primary full" type="submit">${icon("save")} Save item</button>
+          <button class="button primary full" type="submit">${icon("save")} Save evidence item name</button>
           <button class="button secondary full" type="button" data-cancel-evidence-item>${icon("x")} Cancel</button>
         </div>
       </form>
@@ -1289,7 +1259,7 @@ function renderReadiness() {
 
       <div class="actions">
         <button class="button primary full" type="button" data-next>${icon("user-search")} Find trusted help</button>
-        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask ClaimNCO about a situation</button>
+        <button class="button secondary full" type="button" data-open-ask-nco>${icon("message-circle-question")} Ask NCO about a situation</button>
         <button class="button secondary full" type="button" data-add-condition>${icon("plus")} Add another condition</button>
       </div>
 
@@ -1627,7 +1597,7 @@ function renderAskNcoPanel() {
 
       <div class="notice">
         ${icon("shield-check")}
-        <p><strong>Safety boundary</strong>Ask ClaimNCO explains common situations and points to official sources. It is not VA, legal advice, medical advice, or an accredited representative.</p>
+        <p><strong>Safety boundary</strong>Ask NCO explains common situations and points to official sources. It is not VA, legal advice, medical advice, or an accredited representative.</p>
       </div>
 
       ${
@@ -1643,7 +1613,7 @@ function renderAskNcoPanel() {
             ${scenario ? renderAskNcoAnswer(scenario) : renderAskNcoComingSoon()}
           `
           : `
-            <div class="assistant-options" aria-label="Ask ClaimNCO starting choices">
+            <div class="assistant-options" aria-label="Ask NCO starting choices">
               ${renderAskNcoChoiceButtons()}
             </div>
           `
@@ -1807,9 +1777,6 @@ function saveEvidenceItem(form) {
   const formData = new FormData(form);
   condition.items.push({
     title: formData.get("title") || "Untitled evidence item",
-    category: formData.get("category") || "Other",
-    status: formData.get("status") || "Not sure",
-    location: formData.get("location") || "",
   });
   state.editingEvidenceItem = false;
   render();
