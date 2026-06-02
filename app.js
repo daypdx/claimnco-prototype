@@ -59,7 +59,77 @@ const nationalVsoOptions = [
   },
 ];
 
+const evidenceStatusOptions = ["Have it", "Need it", "Not sure", "Need to ask VSO"];
+
+const evidenceRequirementFields = [
+  {
+    key: "currentCondition",
+    label: "Current condition",
+    helper: "Current symptoms, diagnosis, treatment notes, or a clear description of what is wrong now.",
+  },
+  {
+    key: "serviceEvent",
+    label: "Service event/exposure",
+    helper: "A record, event, injury, exposure, aggravation, deployment detail, or duty history.",
+  },
+  {
+    key: "nexusLink",
+    label: "Nexus/link",
+    helper: "Something that helps explain why the current issue may be connected to service.",
+  },
+  {
+    key: "severityImpact",
+    label: "Severity/current impact",
+    helper: "How often it happens, how bad it gets, and how it affects work or daily life.",
+  },
+  {
+    key: "treatmentHistory",
+    label: "Treatment history",
+    helper: "VA, private, urgent care, prescriptions, therapy, tests, or self-care notes.",
+  },
+  {
+    key: "layBuddy",
+    label: "Lay/buddy statement",
+    helper: "A personal, spouse, family, coworker, or buddy statement if it helps explain what changed.",
+  },
+];
+
+const evidenceSupportTags = [
+  "Current condition",
+  "Service event/exposure",
+  "Nexus/link",
+  "Severity/current impact",
+  "Treatment history",
+  "VA request",
+  "Decision/review issue",
+  "Lay/buddy statement",
+];
+
+const defaultVsoQuestions = [
+  "What evidence would best support this condition?",
+  "Does this look like an original, secondary, increase, or supplemental issue?",
+  "Should I file now, submit or confirm Intent to File, or gather more first?",
+  "What should I avoid uploading twice or without context?",
+];
+
 const askNcoScenarios = [
+  {
+    id: "dont-know-claim",
+    category: "Start here",
+    title: "I do not know what to claim.",
+    plain: "ClaimNCO does not decide what to claim. It can help you organize symptoms, diagnoses, service events, exposures, treatment, and questions so an accredited helper can review them with you.",
+    why: "A VSO or accredited representative can help you discuss possible claim paths. ClaimNCO is the prep layer that turns possibilities into condition cards, evidence gaps, and VSO questions.",
+    next: "Write down the problems you want to ask about, add each as a possible condition, and ask a VSO which items need more evidence or a different path.",
+    checks: ["Symptoms or diagnoses", "Service events, exposures, injuries, or aggravation", "Current treatment or records", "Work and daily-life impact", "Any prior VA letters or decisions"],
+    vso: "Can you help me identify which possible conditions are worth discussing and what evidence each one needs?",
+    sourceLabel: "Accredited-help routing",
+    sourceUrl: "https://www.va.gov/get-help-from-accredited-representative/",
+    routing: "Use official VA sources and accredited help before acting on confusing or time-sensitive issues.",
+    actions: [
+      { label: "Add possible condition", icon: "plus", screen: 3 },
+      { label: "Find accredited help", icon: "user-search", screen: 6 },
+    ],
+  },
   {
     id: "intent",
     category: "Before filing",
@@ -170,7 +240,7 @@ const askNcoScenarios = [
     next: "Call the number on the exam notice, write down who you spoke with, and contact a VSO or accredited representative.",
     checks: ["Exam notice phone number", "Reason you missed it", "Call date and time", "Name of person you spoke with", "Any new appointment or instructions"],
     vso: "I missed my C&P exam. What should I do right now to protect my claim?",
-    sourceLabel: "Official VA source plus legal-risk warning",
+    sourceLabel: "Official VA source plus deadline warning",
     sourceUrl: "https://www.va.gov/resources/va-claim-exam/",
     routing: "Urgent VSO or accredited help recommended.",
     actions: [
@@ -199,7 +269,7 @@ const askNcoScenarios = [
     category: "Decision",
     title: "A condition was denied.",
     plain: "A denial does not always mean the issue is over. The decision letter should explain why VA denied it.",
-    why: "The next step depends on the reason: missing diagnosis, missing service event, missing nexus, weak severity evidence, or possible VA error.",
+    why: "The next step depends on the reason: missing diagnosis, missing service event, missing nexus, unclear severity evidence, or possible VA error.",
     next: "Identify the denial reason and save the review deadline. Talk to accredited help before choosing a review path.",
     checks: ["Decision date", "Denial reason", "Evidence VA reviewed", "Review deadline", "Whether you have new and relevant evidence"],
     vso: "Based on the denial reason, what review option should I ask about and what evidence is missing?",
@@ -262,20 +332,150 @@ const askNcoScenarios = [
       { label: "Find a VSO", icon: "user-search", screen: 6 },
     ],
   },
+  {
+    id: "benefits-not-sure",
+    category: "Start here",
+    title: "I am not sure what to organize.",
+    plain: "Start with plain-language notes: symptoms, diagnoses, service events, exposures, current treatment, VA letters, and problems you want to ask about.",
+    why: "ClaimNCO does not identify benefits or tell you what to claim. Its job is to organize possible conditions into evidence gaps and VSO questions.",
+    next: "Add one possible condition or question at a time, then ask a VSO or accredited representative which items need more evidence or a different path.",
+    checks: ["Any symptoms or problems you want to ask about", "Any service events, exposures, or injuries you remember", "Any VA letters or prior decisions", "Whether you need a VSO to help identify possible paths"],
+    vso: "Can you help me identify which possible benefits or conditions may apply before I organize evidence?",
+    sourceLabel: "Find accredited help",
+    sourceUrl: "https://www.va.gov/get-help-from-accredited-representative/",
+    routing: "ClaimNCO keeps the prep organized; accredited help should review unclear or high-stakes questions.",
+    actions: [
+      { label: "Find accredited help", icon: "user-search", screen: 6 },
+      { label: "Add possible condition", icon: "plus", screen: 3 },
+    ],
+  },
+  {
+    id: "possible-conditions",
+    category: "VSO prep",
+    title: "I have possible conditions from a VSO, VA letter, checklist, records, or notes.",
+    plain: "Good. Now organize each possible condition so a VSO or accredited representative can review it with less guesswork.",
+    why: "A possible condition is only a starting point. VA decisions depend on evidence, claim path, and official review.",
+    next: "Turn each possible condition into a condition card. For each one, capture the current condition, service event or exposure, possible link, severity or impact, evidence, and questions for a VSO.",
+    checks: ["List of possible conditions", "Current symptoms or diagnosis", "Service event, exposure, or aggravation", "Possible connection to service", "Evidence you already have"],
+    vso: "Which of these possible conditions are ready to file, and which need more evidence or a different claim path?",
+    sourceLabel: "Official VA source",
+    sourceUrl: "https://www.va.gov/disability/how-to-file-claim/evidence-needed/",
+    routing: "Use accredited help before acting on confusing or high-stakes claim paths.",
+    actions: [
+      { label: "Add condition cards", icon: "plus", screen: 3 },
+      { label: "Open evidence checklist", icon: "folder-check", screen: 4 },
+      { label: "Find a VSO", icon: "user-search", screen: 6 },
+    ],
+  },
+  {
+    id: "increase",
+    category: "Current rating",
+    title: "I need an increase.",
+    plain: "If a service-connected condition has worsened, the useful prep is current severity, treatment, flare-ups, work impact, daily-life impact, and what evidence shows the change.",
+    why: "Increase discussions are about current severity and impact. ClaimNCO can help organize that story and the questions to ask without estimating an outcome.",
+    next: "Create or update a condition card, mark current-severity evidence, and ask accredited help what evidence is useful before filing anything.",
+    checks: ["Current symptoms and bad days", "Recent VA or private treatment", "Medication or assistive devices", "Work and daily-life impact", "Any recent exam or decision letter"],
+    vso: "For this already service-connected condition, what evidence should I organize before discussing an increase?",
+    sourceLabel: "Official VA source",
+    sourceUrl: "https://www.va.gov/disability/how-to-file-claim/",
+    routing: "Use accredited help if the condition, effective date, unemployability, or review path is confusing.",
+    actions: [
+      { label: "Add condition card", icon: "plus", screen: 3 },
+      { label: "Open evidence checklist", icon: "folder-check", screen: 4 },
+      { label: "Find accredited help", icon: "user-search", screen: 6 },
+    ],
+  },
+  {
+    id: "no-sick-call",
+    category: "Evidence",
+    title: "I never went to sick call.",
+    plain: "Not having sick-call records does not automatically end the conversation. It means you may need other evidence to explain what happened and what changed.",
+    why: "A VSO can help you think through service records, duty history, buddy statements, private treatment, and your own statement without guessing.",
+    next: "Write down the event, when it happened, who saw it, what changed after, and what records or statements might support it.",
+    checks: ["Service event or exposure", "People who saw the event or symptoms", "Private or VA treatment after service", "Work/life changes", "Buddy or family statement options"],
+    vso: "If I did not go to sick call, what evidence can help explain the service event and ongoing symptoms?",
+    sourceLabel: "Official VA source",
+    sourceUrl: "https://www.va.gov/disability/how-to-file-claim/evidence-needed/",
+    routing: "Ask a VSO before assuming missing sick-call records mean nothing can be organized.",
+    actions: [
+      { label: "Add condition", icon: "plus", screen: 3 },
+      { label: "Open evidence checklist", icon: "folder-check", screen: 4 },
+    ],
+  },
+  {
+    id: "sign-in-trouble",
+    category: "VA.gov access",
+    title: "I cannot sign in to VA.gov / Login.gov / ID.me.",
+    plain: "Sign-in problems are common and should be handled through official VA, Login.gov, or ID.me support pages.",
+    why: "VA.gov access helps you check claim status, letters, evidence requests, and decision documents. It is also identity-protected.",
+    next: "Use the official sign-in and support links. If you are stuck, bring the issue to a VSO and ask what can be done without VA.gov access.",
+    checks: ["Which account you use", "Email access", "Multifactor method", "Current ID or alternate verification option", "Whether a VSO can help you review next steps"],
+    vso: "What can I do for my claim prep while I am still trying to fix VA.gov sign-in?",
+    sourceLabel: "Official VA source",
+    sourceUrl: "https://www.va.gov/resources/support-for-common-logingov-and-idme-issues/",
+    actions: [
+      { label: "VA.gov sign-in", icon: "external-link", url: "https://www.va.gov/sign-in/" },
+      { label: "Login.gov and ID.me support", icon: "external-link", url: "https://www.va.gov/resources/support-for-common-logingov-and-idme-issues/" },
+    ],
+  },
+  {
+    id: "zero-percent",
+    category: "Decision",
+    title: "I got 0%.",
+    plain: "A 0% decision can still matter, but the decision letter controls what VA decided and why.",
+    why: "The next step depends on what the letter says about the condition, evidence, effective date, and review options.",
+    next: "Save the decision date, read the reasons, and ask accredited help whether more evidence, a review option, or a future increase discussion is appropriate.",
+    checks: ["Decision date", "Condition listed at 0%", "Reasons VA gave", "Evidence VA reviewed", "Symptoms and work/life impact since the exam"],
+    vso: "Based on this 0% decision, what evidence or review path should I ask about?",
+    sourceLabel: "Official VA source",
+    sourceUrl: "https://www.va.gov/decision-reviews/",
+    routing: "Ask a VSO, accredited claims agent, or attorney before choosing a review path.",
+    actions: [
+      { label: "Decision reviews", icon: "external-link", url: "https://www.va.gov/decision-reviews/" },
+      { label: "Find accredited help", icon: "user-search", screen: 6 },
+    ],
+  },
+  {
+    id: "deferred",
+    category: "Decision",
+    title: "My issue was deferred.",
+    plain: "Deferred usually means VA has not made a final decision on that issue yet.",
+    why: "VA may need more evidence, records, clarification, or an exam before deciding that issue.",
+    next: "Track the deferred condition, watch for VA requests or exam notices, and ask a VSO what evidence may still be needed.",
+    checks: ["Which issue was deferred", "Any VA request or exam notice", "Evidence already listed in the decision", "Any deadline", "Current contact information with VA"],
+    vso: "What is VA likely waiting on for this deferred issue, and is there evidence I should organize now?",
+    sourceLabel: "Official VA source",
+    sourceUrl: "https://www.va.gov/claim-or-appeal-status/",
+    routing: "Use VA.gov and mail notices for current status, and bring confusing letters to accredited help.",
+    actions: [
+      { label: "Check claim status", icon: "external-link", url: "https://www.va.gov/claim-or-appeal-status/" },
+      { label: "Find a VSO", icon: "user-search", screen: 6 },
+    ],
+  },
 ];
 
 const askNcoEntryOptions = [
+  { labelHtml: "I don&rsquo;t know what to claim", scenarioId: "dont-know-claim" },
+  { labelHtml: "I already have possible conditions", scenarioId: "possible-conditions" },
+  { labelHtml: "I&rsquo;m not sure what to organize", scenarioId: "benefits-not-sure" },
+  { labelHtml: "I need an increase", scenarioId: "increase" },
   { labelHtml: "I&rsquo;m thinking about filing", scenarioId: "intent" },
   { labelHtml: "I&rsquo;m gathering evidence", scenarioId: "evidence-basics" },
+  { labelHtml: "I never went to sick call", scenarioId: "no-sick-call" },
+  { labelHtml: "I can&rsquo;t sign in to VA.gov / Login.gov / ID.me", scenarioId: "sign-in-trouble" },
   { labelHtml: "I already submitted", scenarioId: "submitted-waiting" },
   { labelHtml: "I got a VA letter", scenarioId: "va-request" },
   { labelHtml: "I have a C&amp;P exam", scenarioId: "cp-exam" },
+  { labelHtml: "I missed a C&amp;P exam", scenarioId: "missed-exam" },
   { labelHtml: "I got a decision", scenarioId: "decision-received" },
+  { labelHtml: "A condition was denied", scenarioId: "denied" },
+  { labelHtml: "I got 0%", scenarioId: "zero-percent" },
+  { labelHtml: "My issue was deferred", scenarioId: "deferred" },
   { labelHtml: "I need a VSO", scenarioId: "need-vso" },
   { labelHtml: "I&rsquo;m not sure", scenarioId: "not-sure" },
 ];
 
-const state = {
+const initialState = () => ({
   screen: 0,
   stage: "gathering",
   pathwayMode: null,
@@ -289,33 +489,49 @@ const state = {
   conditions: [
     {
       id: "back-pain",
-      name: "Back pain",
-      diagnosis: "Not sure",
-      symptoms: "Pain, stiffness, trouble standing for long periods",
+      name: "Back condition",
+      currentCondition: "Pain, stiffness, trouble standing for long periods",
+      diagnosisStatus: "Not sure",
       serviceEvent: "Lift injury during deployment",
-      impact: "Missed work, limited driving",
+      connectionTheory: "Symptoms started after the lift injury and continued after service",
+      severityImpact: "Missed work, limited driving",
       evidence: {
-        current: "Have it",
-        service: "Not sure",
-        lay: "Need to request it",
-        severity: "Need to add notes",
+        currentCondition: "Have it",
+        serviceEvent: "Not sure",
+        nexusLink: "Need to ask VSO",
+        severityImpact: "Need it",
+        treatmentHistory: "Have it",
+        layBuddy: "Need it",
       },
-      items: [],
+      evidenceItems: [
+        {
+          title: "Private clinic visit notes",
+          location: "Private clinic portal",
+          status: "Have it",
+          supports: ["Current condition", "Treatment history"],
+          notes: "Name only. No document stored in prototype.",
+        },
+      ],
+      vsoQuestions: ["What evidence would best explain the link between the lift injury and current back symptoms?"],
     },
     {
       id: "ringing-ears",
       name: "Ringing in ears",
-      diagnosis: "No",
-      symptoms: "Ringing after noise exposure",
+      currentCondition: "Ringing after noise exposure",
+      diagnosisStatus: "No",
       serviceEvent: "Weapons and vehicle noise",
-      impact: "Trouble sleeping and focusing",
+      connectionTheory: "Ringing started during service noise exposure and still affects sleep",
+      severityImpact: "Trouble sleeping and focusing",
       evidence: {
-        current: "Not sure",
-        service: "Have it",
-        lay: "Not sure",
-        severity: "Need to add notes",
+        currentCondition: "Not sure",
+        serviceEvent: "Have it",
+        nexusLink: "Need to ask VSO",
+        severityImpact: "Need it",
+        treatmentHistory: "Not sure",
+        layBuddy: "Not sure",
       },
-      items: [],
+      evidenceItems: [],
+      vsoQuestions: ["Should I get a hearing exam or ask about other evidence before filing?"],
     },
   ],
   selectedConditionId: "back-pain",
@@ -325,6 +541,9 @@ const state = {
   },
   editingCondition: null,
   editingEvidenceItem: false,
+  reviewerGuide: false,
+  lastFeedback: null,
+  resetArmed: false,
   askNco: {
     open: false,
     scenarioId: null,
@@ -335,7 +554,9 @@ const state = {
     "Medical records for current condition",
     "Symptom impact notes",
   ],
-};
+});
+
+let state = initialState();
 
 const screenEl = document.querySelector("#screen");
 const titleEl = document.querySelector("#screenTitle");
@@ -378,10 +599,89 @@ function currentCondition() {
   return state.conditions.find((condition) => condition.id === state.selectedConditionId) || state.conditions[0];
 }
 
+function conditionValue(condition, key, fallback = "Not listed") {
+  const value = condition[key];
+  return value && String(value).trim() ? value : fallback;
+}
+
+function evidenceStatus(condition, key) {
+  return condition.evidence?.[key] || "Not sure";
+}
+
+function evidenceStatusLabel(status) {
+  if (status === "Have it") return "Evidence I have";
+  if (status === "Need it") return "Need to gather";
+  if (status === "Need to ask VSO") return "Ask VSO";
+  return "Not sure";
+}
+
+function evidenceNeedStatuses() {
+  return ["Need it", "Not sure", "Need to ask VSO"];
+}
+
+function conditionEvidenceEntries(condition) {
+  return evidenceRequirementFields.map((field) => ({
+    ...field,
+    status: evidenceStatus(condition, field.key),
+  }));
+}
+
+function conditionVsoQuestions(condition) {
+  const custom = condition.vsoQuestions?.filter(Boolean) || [];
+  const gapQuestions = conditionEvidenceEntries(condition)
+    .filter((entry) => entry.status !== "Have it")
+    .map((entry) => `What evidence would help with ${entry.label.toLowerCase()} for ${condition.name}?`);
+  return [...new Set([...custom, ...gapQuestions, ...defaultVsoQuestions])];
+}
+
+function evidenceItemsFor(condition) {
+  return condition.evidenceItems || condition.items || [];
+}
+
+function documentsToGather(condition) {
+  const gapDocs = conditionEvidenceEntries(condition)
+    .filter((entry) => evidenceNeedStatuses().includes(entry.status))
+    .map((entry) => `${condition.name}: ${entry.label}`);
+  const itemDocs = evidenceItemsFor(condition)
+    .filter((item) => item.status !== "Have it")
+    .map((item) => `${condition.name}: ${item.title || "Untitled evidence item"}`);
+  return [...gapDocs, ...itemDocs];
+}
+
+function packetStats() {
+  const evidenceEntries = state.conditions.flatMap(conditionEvidenceEntries);
+  const evidenceItems = state.conditions.flatMap(evidenceItemsFor);
+  const documents = state.conditions.flatMap(documentsToGather);
+
+  return {
+    conditions: state.conditions.length,
+    have: evidenceEntries.filter((entry) => entry.status === "Have it").length,
+    needsReview: evidenceEntries.filter((entry) => entry.status !== "Have it").length,
+    evidenceItems: evidenceItems.length,
+    documents: documents.length,
+    questions: vsoQuestions().length,
+  };
+}
+
+function resetPrototype() {
+  state = initialState();
+  state.resetArmed = false;
+  state.lastFeedback = "Prototype reset with sample data.";
+  render();
+  screenEl.scrollTop = 0;
+  showToast("Prototype reset with sample data.");
+}
+
+function setFeedback(message) {
+  state.lastFeedback = message;
+}
+
 function setScreen(index) {
   state.askNco.open = false;
   state.askNco.scenarioId = null;
   state.pathwayMode = null;
+  state.reviewerGuide = false;
+  state.resetArmed = false;
   state.screen = Math.max(0, Math.min(index, screens.length - 1));
   render();
   screenEl.scrollTop = 0;
@@ -398,7 +698,29 @@ function nextScreen() {
   setScreen(state.screen + 1);
 }
 
+function continueFromStage() {
+  if (state.stage === "submitted" || state.stage === "decision") {
+    state.pathwayMode = state.stage;
+    state.reviewerGuide = false;
+    state.editingCondition = null;
+    state.editingEvidenceItem = false;
+    render();
+    screenEl.scrollTop = 0;
+    showToast(state.stage === "submitted" ? "After-filing help opened." : "Decision help opened.");
+    return;
+  }
+
+  nextScreen();
+}
+
 function previousScreen() {
+  if (state.reviewerGuide) {
+    state.reviewerGuide = false;
+    render();
+    screenEl.scrollTop = 0;
+    return;
+  }
+
   if (state.pathwayMode) {
     state.pathwayMode = null;
     render();
@@ -413,15 +735,19 @@ function updateShell() {
     ? state.pathwayMode === "submitted"
       ? "After Filing"
       : "Decision Help"
+    : state.reviewerGuide
+      ? "Reviewer Guide"
     : screens[state.screen];
   titleEl.textContent = current === "Welcome" ? "ClaimNCO" : current;
-  stepLabelEl.textContent = state.pathwayMode
+  stepLabelEl.textContent = state.reviewerGuide
+    ? "Feedback mode"
+    : state.pathwayMode
     ? "Different path"
     : `Step ${state.screen + 1} of ${screens.length}`;
-  progressEl.style.width = `${((state.screen + 1) / screens.length) * 100}%`;
+  progressEl.style.width = state.reviewerGuide ? "100%" : `${((state.screen + 1) / screens.length) * 100}%`;
   progressShell.hidden = false;
-  backButton.disabled = state.screen === 0 && !state.pathwayMode;
-  backButton.style.visibility = state.screen === 0 && !state.pathwayMode ? "hidden" : "visible";
+  backButton.disabled = state.screen === 0 && !state.pathwayMode && !state.reviewerGuide;
+  backButton.style.visibility = state.screen === 0 && !state.pathwayMode && !state.reviewerGuide ? "hidden" : "visible";
   askNcoButton.disabled = false;
   askNcoButton.setAttribute("aria-current", "false");
 }
@@ -437,6 +763,25 @@ function renderMiniMap() {
       `,
     )
     .join("");
+}
+
+function renderInlineFeedback() {
+  if (!state.lastFeedback) return;
+  const stack = screenEl.querySelector(".screen-stack");
+  if (!stack) return;
+  const anchor = stack.querySelector(".hero-block");
+  const feedbackHtml = `
+    <div class="notice save-banner" role="status" aria-live="polite">
+      ${icon("check-circle")}
+      <p><strong>Saved to this prototype</strong> ${escapeHtml(state.lastFeedback)}</p>
+    </div>
+  `;
+
+  if (anchor) {
+    anchor.insertAdjacentHTML("afterend", feedbackHtml);
+  } else {
+    stack.insertAdjacentHTML("afterbegin", feedbackHtml);
+  }
 }
 
 function renderResources() {
@@ -479,19 +824,116 @@ function renderInlineResources(items = inlineResourceItems()) {
     .join("");
 }
 
+function renderPossibleConditionsCard() {
+  return `
+    <section class="info-panel handoff-card">
+      <div class="condition-head">
+        <div>
+          <p class="eyebrow">Condition organizer</p>
+          <h3>Already have possible conditions?</h3>
+        </div>
+        ${icon("route")}
+      </div>
+      <p>If you already have possible conditions from a VSO, VA letter, medical records, symptoms, or another checklist, ClaimNCO can help organize them into evidence gaps and VSO questions.</p>
+      <div class="action-row">
+        <button class="button secondary" type="button" data-add-condition>${icon("plus")} Add possible condition</button>
+        <button class="button secondary" type="button" data-screen-jump="5">${icon("list-checks")} Prepare VSO questions</button>
+        <button class="button secondary" type="button" data-screen-jump="6">${icon("user-search")} Find accredited help</button>
+        <button class="button secondary" type="button" data-open-ask-nco data-ask-open-scenario="possible-conditions">${icon("clipboard-list")} I already have notes</button>
+      </div>
+      <p class="source-note">This is not a recommendation to file anything. Bring the organized packet to a VSO or accredited representative.</p>
+    </section>
+  `;
+}
+
+function reviewerFeedbackText() {
+  return [
+    "ClaimNCO Reviewer Feedback",
+    "",
+    "Reviewer role: Veteran / VSO / accredited representative / family helper / other",
+    "",
+    "1. In one sentence, what do you think ClaimNCO is for?",
+    "",
+    "2. Would the VSO prep summary make an appointment easier? Why or why not?",
+    "",
+    "3. What is confusing, missing, or too much?",
+    "",
+    "4. Which screen felt most useful?",
+    "",
+    "5. Which screen would make a veteran nervous or uncertain?",
+    "",
+    "6. Did ClaimNCO clearly avoid telling the user what to claim or promising outcomes?",
+    "",
+    "7. What would you change before showing this to more veterans?",
+    "",
+    "Safety note: Use fake/sample information only. Do not enter SSNs, claim numbers, banking information, full medical records, or private identifiers.",
+  ].join("\n");
+}
+
+function renderReviewerGuide() {
+  return `
+    <div class="screen-stack">
+      <div class="hero-block">
+        <p class="eyebrow">Feedback mode</p>
+        <h2>VSO reviewer guide.</h2>
+        <p>Use this script to test whether ClaimNCO makes a veteran more organized before a VSO or accredited representative appointment.</p>
+      </div>
+
+      <div class="notice warning">
+        ${icon("lock")}
+        <p><strong>Use fake information</strong>This is still a static prototype. Do not enter SSNs, claim numbers, banking information, full medical records, or private identifiers.</p>
+      </div>
+
+      <section class="info-panel">
+        <h3>What we are testing</h3>
+        <ul class="guidance-list">
+          <li>${icon("circle-dot")}<span>Can a veteran understand where they are in the process?</span></li>
+          <li>${icon("circle-dot")}<span>Can they organize 1-3 possible conditions without feeling told what to claim?</span></li>
+          <li>${icon("circle-dot")}<span>Can they mark evidence they have and gaps they need to ask about?</span></li>
+          <li>${icon("circle-dot")}<span>Would the final VSO prep summary make an appointment easier?</span></li>
+        </ul>
+      </section>
+
+      <section class="info-panel">
+        <h3>5-minute walk-through</h3>
+        <ol class="question-list">
+          <li>Click <strong>Build my VSO prep packet</strong>.</li>
+          <li>Add or edit one fake condition.</li>
+          <li>Mark one evidence area as <strong>Have it</strong>.</li>
+          <li>Mark one evidence area as <strong>Need it</strong> or <strong>Not sure</strong>.</li>
+          <li>Generate the VSO prep summary.</li>
+          <li>Ask: would this help a real VSO appointment?</li>
+        </ol>
+      </section>
+
+      <section class="info-panel">
+        <h3>Feedback questions</h3>
+        <pre class="feedback-prompts">${escapeHtml(reviewerFeedbackText())}</pre>
+      </section>
+
+      <div class="actions">
+        <button class="button primary full" type="button" data-reviewer-start>${icon("play")} Start reviewer walk-through</button>
+        <button class="button secondary full" type="button" data-reviewer-summary>${icon("file-text")} Jump to sample summary</button>
+        <button class="button secondary full" type="button" data-copy-reviewer-feedback>${icon("copy")} Copy feedback questions</button>
+        <button class="button secondary full" type="button" data-close-reviewer-guide>${icon("arrow-left")} Back to prototype</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderWelcome() {
   return `
     <div class="screen-stack">
       <div class="hero-block branded-welcome">
         <img class="brand-hero-mark" src="./assets/brand/claimnco-icon-concept.svg" alt="ClaimNCO icon">
         <p class="brand-kicker">ClaimNCO</p>
-        <h2>Get your VA claim squared away.</h2>
-        <p>Go one step at a time: see where you are, what you may need, what looks missing, and what to ask a VSO or accredited representative.</p>
+        <h2>Get organized before your next VA claim step.</h2>
+        <p>Understand where you are. Organize what you have. Know what to ask next before filing, meeting a VSO, responding to VA, or reviewing a decision.</p>
       </div>
 
       <div class="notice">
         ${icon("shield-check")}
-        <p><strong>Prototype boundary</strong>This app explains VA information and helps you organize. It is not VA, a doctor, attorney, VSO, or accredited representative.</p>
+        <p><strong>Prototype boundary</strong>ClaimNCO helps organize what you know, what is missing, and what to ask next. It does not tell you what to claim, estimate VA percentages, submit claims, or replace accredited help.</p>
       </div>
 
       <div class="notice warning">
@@ -501,7 +943,7 @@ function renderWelcome() {
 
       <div class="actions">
         <button class="button primary full" type="button" data-next>
-          ${icon("arrow-right")} Start readiness check
+          ${icon("clipboard-list")} Build my VSO prep packet
         </button>
         <button class="button secondary full" type="button" data-open-ask-nco>
           ${icon("message-circle-question")} Ask NCO
@@ -510,6 +952,19 @@ function renderWelcome() {
           ${icon("book-open")} View official VA resources
         </button>
       </div>
+
+      <details class="guide-disclosure reviewer-disclosure">
+        <summary>
+          <span>For reviewers</span>
+          ${icon("chevron-down")}
+        </summary>
+        <div class="guide-body">
+          <p>Open a short script for VSO, veteran, or helper feedback.</p>
+          <button class="button secondary full" type="button" data-open-reviewer-guide>
+            ${icon("clipboard-check")} VSO reviewer guide
+          </button>
+        </div>
+      </details>
     </div>
   `;
 }
@@ -842,38 +1297,49 @@ function renderBasics() {
 }
 
 function conditionCard(condition) {
-  const evidenceValues = Object.values(condition.evidence);
-  const haveCount = evidenceValues.filter((value) => value === "Have it").length;
-  const unsureCount = evidenceValues.filter((value) => value === "Not sure").length;
-  const status = haveCount > 1 ? "Evidence started" : "Needs review";
+  const entries = conditionEvidenceEntries(condition);
+  const haveCount = entries.filter((entry) => entry.status === "Have it").length;
+  const gapCount = entries.length - haveCount;
+  const priority = readinessPriority(condition);
+  const questions = conditionVsoQuestions(condition).slice(0, 2);
 
   return `
     <article class="condition-card">
       <div class="condition-head">
         <div>
           <h3>${escapeHtml(condition.name)}</h3>
-          <p>${escapeHtml(condition.symptoms)}</p>
+          <p>${escapeHtml(conditionValue(condition, "currentCondition"))}</p>
         </div>
-        <span class="tag ${haveCount > 1 ? "" : "caution"}">${status}</span>
+        <span class="tag ${priority.tone}">${escapeHtml(priority.label)}</span>
       </div>
       <dl class="definition-grid">
         <div class="definition-row">
-          <dt>Diagnosis</dt>
-          <dd>${escapeHtml(condition.diagnosis)}</dd>
+          <dt>What is wrong now?</dt>
+          <dd>${escapeHtml(conditionValue(condition, "currentCondition"))}</dd>
         </div>
         <div class="definition-row">
-          <dt>Service event or exposure</dt>
-          <dd>${escapeHtml(condition.serviceEvent)}</dd>
+          <dt>What happened in service?</dt>
+          <dd>${escapeHtml(conditionValue(condition, "serviceEvent"))}</dd>
         </div>
         <div class="definition-row">
-          <dt>Impact</dt>
-          <dd>${escapeHtml(condition.impact)}</dd>
+          <dt>Why might it be connected?</dt>
+          <dd>${escapeHtml(conditionValue(condition, "connectionTheory"))}</dd>
+        </div>
+        <div class="definition-row">
+          <dt>Work/life impact</dt>
+          <dd>${escapeHtml(conditionValue(condition, "severityImpact"))}</dd>
         </div>
       </dl>
       <div class="tag-row">
-        <span class="tag neutral">${haveCount} have</span>
-        <span class="tag caution">${unsureCount} not sure</span>
+        <span class="tag neutral">${haveCount} evidence areas marked have</span>
+        <span class="tag caution">${gapCount} evidence gaps/not sure</span>
       </div>
+      <section class="small-grid">
+        <h4>Questions for VSO</h4>
+        <ul class="plain-list compact">
+          ${questions.map((question) => `<li>${escapeHtml(question)}</li>`).join("")}
+        </ul>
+      </section>
       <div class="action-row">
         <button class="button secondary" type="button" data-edit-condition="${condition.id}">${icon("pencil")} Edit</button>
         <button class="button secondary" type="button" data-evidence-condition="${condition.id}">${icon("folder-check")} Evidence</button>
@@ -886,9 +1352,11 @@ function renderConditions() {
   return `
     <div class="screen-stack">
       <div class="hero-block">
-        <h2>Add possible conditions.</h2>
-        <p>Use plain words like back pain, ringing in ears, sleep problems, anxiety, knee injury, or migraines. You do not need the official medical name yet.</p>
+        <h2>Build condition cards.</h2>
+        <p>Already have possible conditions from a VSO, VA letter, medical records, symptoms, or your own notes? Add them here. ClaimNCO organizes the evidence gaps and VSO questions.</p>
       </div>
+
+      ${renderPossibleConditionsCard()}
 
       <div class="card-list">
         ${state.conditions.map(conditionCard).join("")}
@@ -898,7 +1366,7 @@ function renderConditions() {
 
       <div class="notice">
         ${icon("list-checks")}
-        <p><strong>Each condition gets its own evidence story</strong>Current issue, service event or exposure, possible link, severity, and evidence.</p>
+        <p><strong>Each condition gets its own evidence story</strong>Current issue, service event or exposure, possible link, work/life impact, evidence gaps, and VSO questions.</p>
       </div>
 
       <div class="actions">
@@ -913,77 +1381,61 @@ function renderConditionEditor(condition = null) {
   const draft = condition || {
     id: `condition-${Date.now()}`,
     name: "",
-    diagnosis: "Not sure",
-    symptoms: "",
+    currentCondition: "",
+    diagnosisStatus: "Not sure",
     serviceEvent: "",
-    impact: "",
+    connectionTheory: "",
+    severityImpact: "",
     evidence: {
-      current: "Not sure",
-      service: "Not sure",
-      lay: "Not sure",
-      severity: "Not sure",
+      currentCondition: "Not sure",
+      serviceEvent: "Not sure",
+      nexusLink: "Need to ask VSO",
+      severityImpact: "Not sure",
+      treatmentHistory: "Not sure",
+      layBuddy: "Not sure",
     },
-    items: [],
+    evidenceItems: [],
+    vsoQuestions: [],
   };
-  const conditionFields = isNew
-    ? `
-        <div class="field">
-          <label for="conditionName">Condition name</label>
-          <input id="conditionName" name="name" value="${escapeHtml(draft.name)}" placeholder="Back pain">
-        </div>
-
-        <div class="field">
-          <label for="conditionNotes">Optional symptoms/notes</label>
-          <textarea id="conditionNotes" name="symptoms" placeholder="Pain, ringing, sleep issues, when it started, or what makes it worse">${escapeHtml(draft.symptoms)}</textarea>
-        </div>
-      `
-    : `
-        <div class="field">
-          <label for="conditionName">Condition or symptom area</label>
-          <input id="conditionName" name="name" value="${escapeHtml(draft.name)}" placeholder="Back pain">
-        </div>
-
-        <fieldset class="field">
-          <legend>Do you have a diagnosis?</legend>
-          <div class="option-group">
-            ${["Yes", "No", "Not sure"]
-              .map(
-                (option) => `
-                  <label class="option-card">
-                    <input type="radio" name="diagnosis" value="${option}" ${draft.diagnosis === option ? "checked" : ""}>
-                    <span>${option}</span>
-                  </label>
-                `,
-              )
-              .join("")}
-          </div>
-        </fieldset>
-
-        <div class="field">
-          <label for="symptoms">What symptoms affect you now?</label>
-          <textarea id="symptoms" name="symptoms" placeholder="Pain, stiffness, trouble standing">${escapeHtml(draft.symptoms)}</textarea>
-        </div>
-
-        <div class="field">
-          <label for="serviceEvent">What happened during service that may connect to this?</label>
-          <textarea id="serviceEvent" name="serviceEvent" placeholder="Injury, exposure, illness, event, or aggravation">${escapeHtml(draft.serviceEvent)}</textarea>
-        </div>
-
-        <div class="field">
-          <label for="impact">How does it affect daily life or work?</label>
-          <textarea id="impact" name="impact" placeholder="Work limits, sleep, mobility, focus, daily activities">${escapeHtml(draft.impact)}</textarea>
-        </div>
-      `;
+  const questionText = (draft.vsoQuestions || []).join("\n");
 
   return `
     <div class="screen-stack">
       <div class="hero-block">
         <h2>${isNew ? "Add a condition." : "Edit condition."}</h2>
-        <p>${isNew ? "Use plain words. You can add details later." : "You do not need perfect VA wording yet. Capture what you know."}</p>
+        <p>Use plain words. This is for VSO prep, not a filing recommendation.</p>
       </div>
 
       <form class="form-grid" data-condition-form data-condition-id="${draft.id}" data-new="${isNew}">
-        ${conditionFields}
+        <div class="field">
+          <label for="conditionName">Condition name</label>
+          <input id="conditionName" name="name" value="${escapeHtml(draft.name)}" placeholder="Back condition">
+        </div>
+
+        <div class="field">
+          <label for="currentCondition">Current symptoms or diagnosis</label>
+          <textarea id="currentCondition" name="currentCondition" placeholder="Pain, ringing, migraines, sleep issues, diagnosis if known">${escapeHtml(conditionValue(draft, "currentCondition", ""))}</textarea>
+        </div>
+
+        <div class="field">
+          <label for="serviceEvent">What happened in service / exposure / aggravation?</label>
+          <textarea id="serviceEvent" name="serviceEvent" placeholder="Injury, exposure, training, deployment, job duties, or condition made worse">${escapeHtml(conditionValue(draft, "serviceEvent", ""))}</textarea>
+        </div>
+
+        <div class="field">
+          <label for="connectionTheory">Why do you think it may be connected?</label>
+          <textarea id="connectionTheory" name="connectionTheory" placeholder="Started after an event, continued after service, or got worse because of service">${escapeHtml(conditionValue(draft, "connectionTheory", ""))}</textarea>
+        </div>
+
+        <div class="field">
+          <label for="severityImpact">Work/life impact</label>
+          <textarea id="severityImpact" name="severityImpact" placeholder="Work limits, sleep, mobility, focus, family life, daily activities">${escapeHtml(conditionValue(draft, "severityImpact", ""))}</textarea>
+        </div>
+
+        <div class="field">
+          <label for="vsoQuestions">Questions for VSO</label>
+          <textarea id="vsoQuestions" name="vsoQuestions" placeholder="What evidence do I need before filing?">${escapeHtml(questionText)}</textarea>
+        </div>
 
         <div class="actions">
           <button class="button primary full" type="submit">${icon("save")} Save condition</button>
@@ -995,8 +1447,7 @@ function renderConditionEditor(condition = null) {
 }
 
 function evidenceOptions(name, value) {
-  return ["Have it", "Need to request it", "VA may have it", "Not sure", "Not applicable"]
-    .filter((option) => !(name === "severity" && option === "VA may have it"))
+  return evidenceStatusOptions
     .map(
       (option) => `
         <label class="option-card">
@@ -1024,7 +1475,7 @@ function renderEvidence() {
     <div class="screen-stack">
       <div class="hero-block">
         <h2>Evidence checklist.</h2>
-        <p>Track names and statuses only. The first prototype does not upload or store sensitive records.</p>
+        <p>Evidence matters because of what it helps prove. Track what you have, what is missing, and what to ask a VSO.</p>
       </div>
 
       <div class="action-row">${conditionTabs}</div>
@@ -1033,28 +1484,20 @@ function renderEvidence() {
         <h3>${escapeHtml(condition.name)}</h3>
         <div class="notice">
           ${icon("scale")}
-          <p><strong>Original claim basics</strong>VA generally looks for a current condition, something from service, and a link between the two.</p>
+          <p><strong>Evidence matters because of what it helps prove</strong>Use these categories to organize the conversation. ClaimNCO does not decide what evidence is enough.</p>
         </div>
 
-        <fieldset class="field">
-          <legend>Current condition</legend>
-          <div class="option-group">${evidenceOptions("current", condition.evidence.current)}</div>
-        </fieldset>
-
-        <fieldset class="field">
-          <legend>Service event or records</legend>
-          <div class="option-group">${evidenceOptions("service", condition.evidence.service)}</div>
-        </fieldset>
-
-        <fieldset class="field">
-          <legend>Lay or buddy statement</legend>
-          <div class="option-group">${evidenceOptions("lay", condition.evidence.lay)}</div>
-        </fieldset>
-
-        <fieldset class="field">
-          <legend>Severity or daily impact evidence</legend>
-          <div class="option-group">${evidenceOptions("severity", condition.evidence.severity)}</div>
-        </fieldset>
+        ${conditionEvidenceEntries(condition)
+          .map(
+            (entry) => `
+              <fieldset class="field">
+                <legend>${escapeHtml(entry.label)}</legend>
+                <p>${escapeHtml(entry.helper)}</p>
+                <div class="option-group">${evidenceOptions(entry.key, entry.status)}</div>
+              </fieldset>
+            `,
+          )
+          .join("")}
 
         <div class="notice warning">
           ${icon("lock")}
@@ -1073,23 +1516,30 @@ function renderEvidence() {
 }
 
 function renderEvidenceItems(condition) {
-  if (!condition.items.length) {
+  const items = evidenceItemsFor(condition);
+  if (!items.length) {
     return `
       <div class="notice">
         ${icon("file-plus")}
-        <p><strong>No evidence item names added</strong>You can add a record name, test result, or buddy statement here without uploading the actual document.</p>
+        <p><strong>No evidence items added</strong>You can add a record name, test result, letter, or buddy statement without uploading the actual document.</p>
       </div>
     `;
   }
 
   return `
     <div class="card-list">
-      ${condition.items
+      ${items
         .map(
           (item) => `
             <article class="summary-card">
               <h3>${escapeHtml(item.title)}</h3>
-              <p>Name saved for organization only. No file, photo, or sensitive record is stored.</p>
+              <div class="tag-row">
+                <span class="tag ${item.status === "Have it" ? "neutral" : "caution"}">${escapeHtml(item.status || "Not sure")}</span>
+                ${(item.supports || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+              </div>
+              <p>${escapeHtml(item.location ? `Where it is: ${item.location}` : "Where it is: Not listed")}</p>
+              ${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ""}
+              <p>Name and tags saved for organization only. No file, photo, or sensitive record is stored.</p>
             </article>
           `,
         )
@@ -1104,13 +1554,45 @@ function renderEvidenceItemEditor() {
     <div class="screen-stack">
       <div class="hero-block">
         <h2>Add evidence item.</h2>
-        <p>Add a record name only. Keep actual records and sensitive details out of this prototype.</p>
+        <p>You do not need to upload the document here. Just track what it supports and where to find it.</p>
       </div>
 
       <form class="form-grid" data-evidence-item-form data-condition-id="${condition.id}">
         <div class="field">
           <label for="evidenceTitle">Evidence item name</label>
           <input id="evidenceTitle" name="title" placeholder="Clinic record, test result, or buddy statement">
+        </div>
+
+        <div class="field">
+          <label for="evidenceLocation">Where it is / how to get it</label>
+          <input id="evidenceLocation" name="location" placeholder="VA.gov, private clinic portal, personal notes, ask buddy">
+        </div>
+
+        <fieldset class="field">
+          <legend>Status</legend>
+          <div class="option-group">${evidenceOptions("status", "Not sure")}</div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>What does this evidence support?</legend>
+          <p>Pick one or more. Evidence matters because of what it helps prove.</p>
+          <div class="option-group">
+            ${evidenceSupportTags
+              .map(
+                (tag) => `
+                  <label class="option-card">
+                    <input type="checkbox" name="supports" value="${escapeHtml(tag)}">
+                    <span>${escapeHtml(tag)}</span>
+                  </label>
+                `,
+              )
+              .join("")}
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="evidenceNotes">Notes</label>
+          <textarea id="evidenceNotes" name="notes" placeholder="What should I ask the VSO about this?"></textarea>
         </div>
 
         <div class="field">
@@ -1134,64 +1616,58 @@ function renderEvidenceItemEditor() {
 }
 
 function evidenceCounts(condition) {
-  const values = Object.values(condition.evidence);
+  const values = conditionEvidenceEntries(condition).map((entry) => entry.status);
   return {
     have: values.filter((value) => value === "Have it").length,
     unsure: values.filter((value) => value === "Not sure").length,
-    review: values.filter((value) => value.includes("request") || value.includes("add")).length,
+    review: values.filter((value) => value === "Need it" || value === "Need to ask VSO").length,
   };
 }
 
 function nextAction(condition) {
-  if (condition.evidence.current === "Not sure") return "Review current medical evidence";
-  if (condition.evidence.service === "Not sure") return "Review service event records";
-  if (condition.evidence.lay === "Need to request it") return "Review lay or buddy statements";
-  if (condition.evidence.severity !== "Have it") return "Review symptom impact notes";
-  return "Review with accredited help";
+  if (evidenceStatus(condition, "nexusLink") === "Need to ask VSO") return "Ask VSO before filing";
+  const missing = conditionEvidenceEntries(condition).find((entry) => entry.status === "Need it" || entry.status === "Not sure");
+  if (missing) return `Review ${missing.label.toLowerCase()}`;
+  return "Looks ready to review with accredited help";
 }
 
 function readinessPriority(condition) {
-  if (condition.evidence.current === "Not sure") {
+  if (evidenceStatus(condition, "nexusLink") === "Need to ask VSO") {
     return {
       rank: 0,
-      label: "Review first",
+      label: "Ask VSO before filing",
       tone: "alert",
-      reason: "Current medical evidence is unclear.",
+      reason: "The possible link to service needs accredited review.",
     };
   }
 
-  if (condition.evidence.service === "Not sure") {
+  const importantMissing = ["currentCondition", "serviceEvent", "nexusLink"].some((key) =>
+    ["Need it", "Not sure"].includes(evidenceStatus(condition, key)),
+  );
+  if (importantMissing) {
     return {
       rank: 1,
-      label: "Review first",
+      label: "Missing important evidence",
       tone: "alert",
-      reason: "Service event or record support is unclear.",
+      reason: "One or more core evidence areas is missing or unclear.",
     };
   }
 
-  if (condition.evidence.lay === "Need to request it") {
+  const anyGap = conditionEvidenceEntries(condition).some((entry) => entry.status !== "Have it");
+  if (anyGap) {
     return {
       rank: 2,
-      label: "Needs follow-up",
+      label: "Mostly organized",
       tone: "caution",
-      reason: "A lay or buddy statement may still need to be requested.",
-    };
-  }
-
-  if (condition.evidence.severity !== "Have it") {
-    return {
-      rank: 3,
-      label: "Needs follow-up",
-      tone: "caution",
-      reason: "Symptom impact notes may still need review.",
+      reason: "Some supporting evidence still needs review.",
     };
   }
 
   return {
-    rank: 4,
-    label: "Organized",
+    rank: 3,
+    label: "Looks organized",
     tone: "neutral",
-    reason: "This looks organized enough to review with accredited help.",
+    reason: "The main evidence areas are marked as found.",
   };
 }
 
@@ -1209,12 +1685,40 @@ function sortedReadinessConditions() {
 
 function renderReadiness() {
   const readinessConditions = sortedReadinessConditions();
+  const reviewFirst = readinessConditions.filter((condition) => readinessPriority(condition).tone === "alert");
+  const moreOrganized = readinessConditions.filter((condition) => readinessPriority(condition).tone !== "alert");
+  const allQuestions = state.conditions.flatMap((condition) => conditionVsoQuestions(condition).slice(0, 3));
+  const documentGroups = state.conditions
+    .map((condition) => ({
+      condition,
+      documents: documentsToGather(condition),
+    }))
+    .filter((group) => group.documents.length);
+  const readinessCards = (conditions) =>
+    conditions
+      .map((condition) => {
+        const counts = evidenceCounts(condition);
+        const priority = readinessPriority(condition);
+        return `
+          <article class="condition-card readiness-card ${priority.tone === "alert" ? "review-first" : ""}">
+            <div class="condition-head">
+              <div>
+                <h3>${escapeHtml(condition.name)}</h3>
+                <p>Evidence: ${counts.have} marked have / ${counts.unsure + counts.review} missing or not sure</p>
+              </div>
+              <span class="tag ${priority.tone}">${escapeHtml(priority.label)}</span>
+            </div>
+            <p><strong>${nextAction(condition)}.</strong> ${escapeHtml(priority.reason)}</p>
+          </article>
+        `;
+      })
+      .join("");
 
   return `
     <div class="screen-stack">
       <div class="hero-block">
-        <h2>Your readiness snapshot.</h2>
-        <p>This is an organization view, not an approval score or filing recommendation.</p>
+        <h2>VSO prep dashboard.</h2>
+        <p>This shows gaps and questions for a VSO conversation. It is not a score, outcome forecast, or filing recommendation.</p>
       </div>
 
       <div class="notice">
@@ -1222,37 +1726,25 @@ function renderReadiness() {
         <p><strong>Ready for a better conversation</strong>Your information is organized enough to start a productive VSO or accredited representative conversation.</p>
       </div>
 
-      <div class="notice warning">
-        ${icon("list-filter")}
-        <p><strong>Review first</strong>Claim areas with the clearest gaps appear at the top so important follow-up is not buried.</p>
-      </div>
-
-      <div class="card-list">
-        ${readinessConditions
-          .map((condition) => {
-            const counts = evidenceCounts(condition);
-            const priority = readinessPriority(condition);
-            return `
-              <article class="condition-card readiness-card ${priority.tone === "alert" ? "review-first" : ""}">
-                <div class="condition-head">
-                  <div>
-                    <h3>${escapeHtml(condition.name)}</h3>
-                    <p>Evidence: ${counts.have} have / ${counts.unsure} not sure</p>
-                  </div>
-                  <span class="tag ${priority.tone}">${escapeHtml(priority.label)}</span>
-                </div>
-                <p><strong>${nextAction(condition)}.</strong> ${escapeHtml(priority.reason)}</p>
-              </article>
-            `;
-          })
-          .join("")}
-      </div>
+      <section class="info-panel">
+        <h3>Review first</h3>
+        <div class="card-list">
+          ${reviewFirst.length ? readinessCards(reviewFirst) : `<p>No urgent evidence gaps in the sample state.</p>`}
+        </div>
+      </section>
 
       <section class="info-panel">
-        <h3>Topics to review</h3>
-        <p>These are not extra requirements. They are notes you can bring up with a VSO if useful.</p>
+        <h3>Looks more organized</h3>
+        <div class="card-list">
+          ${moreOrganized.length ? readinessCards(moreOrganized) : `<p>Conditions move here as evidence gaps get clearer.</p>`}
+        </div>
+      </section>
+
+      <section class="info-panel">
+        <h3>Questions to ask</h3>
+        <p>These are conversation starters, not extra requirements.</p>
         <ul class="guidance-list">
-          ${state.reviewTopics
+          ${allQuestions.slice(0, 6)
             .map(
               (topic) => `
                 <li>
@@ -1263,6 +1755,38 @@ function renderReadiness() {
             )
             .join("")}
         </ul>
+      </section>
+
+      <section class="info-panel">
+        <h3>Documents to gather</h3>
+        <p>Names only. Gaps are grouped by condition so newly added conditions are visible.</p>
+        <div class="document-gap-list">
+          ${
+            documentGroups.length
+              ? documentGroups
+                  .map(
+                    ({ condition, documents }) => `
+                      <article class="gap-group">
+                        <h4>${escapeHtml(condition.name)}</h4>
+                        <ul class="guidance-list">
+                          ${documents
+                            .map(
+                              (item) => `
+                                <li>
+                                  ${icon("file-search")}
+                                  <span>${escapeHtml(item.replace(`${condition.name}: `, ""))}</span>
+                                </li>
+                              `,
+                            )
+                            .join("")}
+                        </ul>
+                      </article>
+                    `,
+                  )
+                  .join("")
+              : `<p>No document gaps listed yet.</p>`
+          }
+        </div>
       </section>
 
       <section class="info-panel">
@@ -1284,10 +1808,7 @@ function renderReadiness() {
 }
 
 function vsoQuestions() {
-  const conditionQuestions = state.conditions.map((condition) => {
-    const topic = nextAction(condition).replace(/^Review /, "").toLowerCase();
-    return `For ${condition.name}, what evidence would help with ${topic}?`;
-  });
+  const conditionQuestions = state.conditions.flatMap((condition) => conditionVsoQuestions(condition).slice(0, 2));
 
   return [
     "Should I submit Intent to File while gathering evidence?",
@@ -1316,8 +1837,23 @@ function renderVsoHelp() {
           <label for="vsoLocation">ZIP code or city/state</label>
           <input id="vsoLocation" name="searchLocation" value="${escapeHtml(state.vso.searchLocation)}" placeholder="97201 or Portland, OR">
         </div>
-        <button class="button primary full" type="submit">${icon("map-pin")} Use this search area</button>
+        <button class="button primary full" type="submit">${icon("map-pin")} Save search area for summary</button>
       </form>
+
+      <section class="info-panel vso-summary-status">
+        <h3>What will go into the summary</h3>
+        <ul class="guidance-list">
+          <li>
+            ${icon(state.vso.searchLocation ? "check-circle" : "circle")}
+            <span>Search area: ${escapeHtml(state.vso.searchLocation || "Not saved yet")}</span>
+          </li>
+          <li>
+            ${icon(state.vso.savedOption ? "check-circle" : "circle")}
+            <span>VSO option: ${escapeHtml(state.vso.savedOption || "None selected yet")}</span>
+          </li>
+        </ul>
+        <p>Typing a ZIP or city and tapping Generate will also save that search area into the summary.</p>
+      </section>
 
       <div class="notice warning">
         ${icon("map-pinned")}
@@ -1341,12 +1877,12 @@ function renderVsoHelp() {
 
       <section class="info-panel">
         <h3>National VSO options</h3>
-        <p>These are broad VA-recognized VSO networks, not rankings or guarantees.</p>
+        <p>These are broad VA-recognized VSO networks, not rankings or outcome promises.</p>
         <div class="card-list">
           ${nationalVsoOptions
             .map(
               (option) => `
-                <article class="vso-card">
+                <article class="vso-card ${state.vso.savedOption === option.name ? "selected" : ""}">
                   <div>
                     <h3>${escapeHtml(option.name)}</h3>
                     <p>${escapeHtml(option.note)}</p>
@@ -1358,7 +1894,10 @@ function renderVsoHelp() {
                   </div>
                   <div class="action-row">
                     <a class="button secondary" href="${option.url}" target="_blank" rel="noreferrer">${icon("external-link")} Website</a>
-                    <button class="button secondary" type="button" data-save-vso="${escapeHtml(option.name)}">${icon("bookmark")} Use in summary</button>
+                    <button class="button ${state.vso.savedOption === option.name ? "primary" : "secondary"}" type="button" data-save-vso="${escapeHtml(option.name)}">
+                      ${icon(state.vso.savedOption === option.name ? "check" : "bookmark")}
+                      ${state.vso.savedOption === option.name ? "Selected for summary" : "Use in summary"}
+                    </button>
                   </div>
                 </article>
               `,
@@ -1374,7 +1913,7 @@ function renderVsoHelp() {
 
       <div class="notice warning">
         ${icon("shield-alert")}
-        <p><strong>Verify first</strong>Be careful with anyone who is not VA-accredited, promises a guaranteed rating, or asks for unusual fees.</p>
+        <p><strong>Verify first</strong>Be careful with anyone who is not VA-accredited, promises a specific outcome, or asks for unusual fees.</p>
       </div>
 
       <section class="info-panel">
@@ -1392,7 +1931,7 @@ function renderVsoHelp() {
       </section>
 
       <div class="actions">
-        <button class="button primary full" type="button" data-next>${icon("file-text")} Generate VSO prep summary</button>
+        <button class="button primary full" type="button" data-generate-summary>${icon("file-text")} Generate VSO prep summary</button>
       </div>
 
       ${renderBottomNav("VSO")}
@@ -1402,50 +1941,132 @@ function renderVsoHelp() {
 
 function prepSummaryText() {
   const conditionText = state.conditions
-    .map((condition) => {
-      const counts = evidenceCounts(condition);
+    .map((condition, index) => {
+      const have = conditionEvidenceEntries(condition)
+        .filter((entry) => entry.status === "Have it")
+        .map((entry) => `- ${entry.label}`);
+      const missing = conditionEvidenceEntries(condition)
+        .filter((entry) => entry.status !== "Have it")
+        .map((entry) => `- ${entry.label}: ${entry.status}`);
+      const items = evidenceItemsFor(condition).map(
+        (item) =>
+          `- ${item.title || "Untitled evidence item"} (${item.status || "Not sure"}; supports: ${(item.supports || []).join(", ") || "Not tagged"})`,
+      );
+      const questions = conditionVsoQuestions(condition).slice(0, 5).map((question) => `- ${question}`);
+
       return [
-        `Condition: ${condition.name}`,
-        `Symptoms: ${condition.symptoms || "Not listed"}`,
-        `Service event/exposure: ${condition.serviceEvent || "Not listed"}`,
-        `Daily/work impact: ${condition.impact || "Not listed"}`,
-        `Evidence status: ${counts.have} have, ${counts.unsure} not sure, ${counts.review} to review`,
-        `Topic for VSO: ${nextAction(condition)}`,
+        `${index + 1}. ${condition.name}`,
+        `   Current symptoms/diagnosis: ${conditionValue(condition, "currentCondition")}`,
+        `   Service event/exposure/aggravation: ${conditionValue(condition, "serviceEvent")}`,
+        `   Possible connection to service: ${conditionValue(condition, "connectionTheory")}`,
+        `   Work/life impact: ${conditionValue(condition, "severityImpact")}`,
+        "   Evidence I have:",
+        have.length ? have.join("\n") : "   - Not listed",
+        "   Evidence I need / not sure about:",
+        missing.length ? missing.join("\n") : "   - None listed",
+        "   Evidence item names:",
+        items.length ? items.join("\n") : "   - None listed",
+        "   Questions for VSO:",
+        questions.join("\n"),
       ].join("\n");
     })
     .join("\n\n");
+  const documents = state.conditions.flatMap(documentsToGather);
 
   return [
-    "ClaimNCO Claim Readiness Summary",
+    "ClaimNCO VSO Prep Summary",
     "",
-    `Process stage: ${stageLabel(state.stage)}`,
+    `Stage: ${stageLabel(state.stage)}`,
     `Intent to File: ${state.basics.intentToFile}`,
     `VA.gov access: ${state.basics.vaGovAccess}`,
-    `Representative status: ${state.basics.representative}`,
-    `VSO search area: ${state.vso.searchLocation || "Not listed"}`,
-    `VSO option for summary: ${state.vso.savedOption || "None selected"}`,
+    `VSO search area / selected option: ${state.vso.searchLocation || "Not listed"} / ${state.vso.savedOption || "None selected"}`,
     "",
-    "Conditions",
+    "Conditions to discuss",
     conditionText,
     "",
-    "Questions to ask",
+    "Documents to gather",
+    ...(documents.length ? documents.map((item) => `- ${item}`) : ["- No document gaps listed yet"]),
+    "",
+    "Questions for VSO",
     ...vsoQuestions().map((question, index) => `${index + 1}. ${question}`),
+    "",
+    "Official/help reminders",
+    "This summary is for organization only. ClaimNCO is not VA, a VSO, an attorney, or an accredited representative.",
+    "Use official VA sources and accredited help for unclear, complex, or time-sensitive cases.",
   ].join("\n");
 }
 
+function summaryFileName() {
+  const date = new Date().toISOString().slice(0, 10);
+  return `claimnco-vso-prep-summary-${date}.txt`;
+}
+
+function downloadSummary() {
+  const blob = new Blob([prepSummaryText()], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = summaryFileName();
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast("Summary text file created.");
+}
+
+function printSummary() {
+  document.body.classList.add("print-summary");
+  window.print();
+  setTimeout(() => document.body.classList.remove("print-summary"), 500);
+  showToast("Print dialog opened.");
+}
+
+async function copyReviewerFeedback() {
+  try {
+    await navigator.clipboard.writeText(reviewerFeedbackText());
+    showToast("Reviewer questions copied.");
+  } catch {
+    showToast("Copy is unavailable. Reviewer questions are still on screen.");
+  }
+}
+
 function renderSummary() {
+  const stats = packetStats();
+
   return `
     <div class="screen-stack">
       <div class="hero-block">
-        <h2>VSO prep summary.</h2>
-        <p>Bring this to a VSO or accredited representative. It avoids sensitive identifiers and focuses on readiness.</p>
+        <h2>Bring this to your VSO.</h2>
+        <p>ClaimNCO does not represent you before VA. This summary is meant to help you show up organized for a VSO or accredited representative.</p>
       </div>
+
+      <section class="info-panel packet-snapshot">
+        <h3>Packet snapshot</h3>
+        <div class="stat-grid">
+          <div class="stat-tile">
+            <span>${stats.conditions}</span>
+            <small>conditions</small>
+          </div>
+          <div class="stat-tile">
+            <span>${stats.have}</span>
+            <small>evidence areas marked have</small>
+          </div>
+          <div class="stat-tile">
+            <span>${stats.needsReview}</span>
+            <small>evidence gaps or not sure</small>
+          </div>
+          <div class="stat-tile">
+            <span>${stats.questions}</span>
+            <small>VSO questions</small>
+          </div>
+        </div>
+      </section>
 
       <pre class="summary-output" id="summaryOutput">${escapeHtml(prepSummaryText())}</pre>
 
       <div class="notice">
-        ${icon("copy")}
-        <p><strong>Copy-only for now</strong>For this MVP, the summary stays on screen or in your clipboard. PDF and email can come later after privacy and consent are designed carefully.</p>
+        ${icon("file-down")}
+        <p><strong>Local actions only</strong>You can copy, download a plain text file, or print from this device. ClaimNCO still has no account, backend, email, or VA submission.</p>
       </div>
 
       <section class="info-panel">
@@ -1457,7 +2078,14 @@ function renderSummary() {
 
       <div class="actions">
         <button class="button primary full" type="button" data-copy-summary>${icon("copy")} Copy summary</button>
+        <button class="button secondary full" type="button" data-open-reviewer-guide>${icon("clipboard-check")} Open reviewer guide</button>
+        <button class="button secondary full" type="button" data-download-summary>${icon("download")} Download text summary</button>
+        <button class="button secondary full" type="button" data-print-summary>${icon("printer")} Print summary</button>
         <button class="button secondary full" type="button" data-screen-jump="6">${icon("user-search")} Back to VSO help</button>
+        <button class="button ghost full danger-action" type="button" data-reset-prototype>
+          ${icon(state.resetArmed ? "triangle-alert" : "rotate-ccw")}
+          ${state.resetArmed ? "Confirm reset sample data" : "Start a new fake test"}
+        </button>
       </div>
 
       ${renderBottomNav("Summary")}
@@ -1559,7 +2187,7 @@ function renderAskNcoComingSoon() {
 
       <div class="notice warning">
         ${icon("shield-alert")}
-        <p><strong>Safety boundary</strong>This prototype does not give legal advice, medical advice, rating predictions, filing guarantees, or official VA decisions.</p>
+        <p><strong>Safety boundary</strong>This prototype does not provide legal guidance, diagnosis or treatment direction, VA percentage estimates, filing outcomes, or official VA decisions.</p>
       </div>
 
       <div class="action-row">
@@ -1612,7 +2240,7 @@ function renderAskNcoPanel() {
 
       <div class="notice">
         ${icon("shield-check")}
-        <p><strong>Safety boundary</strong>Ask NCO explains common situations and points to official sources. It is not VA, legal advice, medical advice, or an accredited representative.</p>
+        <p><strong>Safety boundary</strong>Ask NCO explains common situations and points to official sources. It is not VA, a law office, a medical provider, or an accredited representative.</p>
       </div>
 
       ${
@@ -1682,6 +2310,8 @@ function render() {
     screenEl.innerHTML = renderConditionEditor(state.editingCondition === "new" ? null : currentCondition());
   } else if (state.editingEvidenceItem) {
     screenEl.innerHTML = renderEvidenceItemEditor();
+  } else if (state.reviewerGuide) {
+    screenEl.innerHTML = renderReviewerGuide();
   } else if (state.pathwayMode) {
     screenEl.innerHTML = renderStageBranch();
   } else {
@@ -1697,6 +2327,7 @@ function render() {
     ][state.screen]();
   }
 
+  renderInlineFeedback();
   hydrateIcons();
   renderAskNcoPanel();
 }
@@ -1731,7 +2362,7 @@ function showToast(message) {
   toast.setAttribute("aria-live", "polite");
   toast.textContent = message;
   document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2600);
+  setTimeout(() => toast.remove(), 4500);
 }
 
 function saveBasics(form) {
@@ -1749,20 +2380,28 @@ function saveCondition(form) {
     ? {
         id,
         evidence: {
-          current: "Not sure",
-          service: "Not sure",
-          lay: "Not sure",
-          severity: "Not sure",
+          currentCondition: "Not sure",
+          serviceEvent: "Not sure",
+          nexusLink: "Need to ask VSO",
+          severityImpact: "Not sure",
+          treatmentHistory: "Not sure",
+          layBuddy: "Not sure",
         },
-        items: [],
+        evidenceItems: [],
+        vsoQuestions: [],
       }
     : state.conditions.find((item) => item.id === id);
 
   condition.name = formData.get("name") || "Untitled condition";
-  condition.diagnosis = formData.get("diagnosis") || "Not sure";
-  condition.symptoms = formData.get("symptoms") || "";
+  condition.currentCondition = formData.get("currentCondition") || "";
+  condition.diagnosisStatus = formData.get("diagnosisStatus") || condition.diagnosisStatus || "Not sure";
   condition.serviceEvent = formData.get("serviceEvent") || "";
-  condition.impact = formData.get("impact") || "";
+  condition.connectionTheory = formData.get("connectionTheory") || "";
+  condition.severityImpact = formData.get("severityImpact") || "";
+  condition.vsoQuestions = String(formData.get("vsoQuestions") || "")
+    .split("\n")
+    .map((question) => question.trim())
+    .filter(Boolean);
 
   if (isNew) {
     state.conditions.push(condition);
@@ -1770,6 +2409,7 @@ function saveCondition(form) {
 
   state.selectedConditionId = condition.id;
   state.editingCondition = null;
+  setFeedback(isNew ? "Condition added." : "Condition saved.");
   render();
   showToast(isNew ? "Condition added." : "Condition saved.");
 }
@@ -1782,36 +2422,105 @@ function saveEvidence(form) {
     const selected = form.querySelector(`input[name="${key}"]:checked`);
     if (selected) condition.evidence[key] = selected.value;
   }
+  setFeedback("Evidence status saved. This will appear in your summary.");
   render();
-  showToast("Evidence status saved.");
+  showToast("Evidence status saved. This will appear in your summary.");
+}
+
+function saveEvidenceChange(input) {
+  const form = input.closest("[data-evidence-form]");
+  const condition = form ? state.conditions.find((item) => item.id === form.dataset.conditionId) : null;
+  if (!condition) return;
+
+  condition.evidence[input.name] = input.value;
+  setFeedback("Evidence status saved. This will appear in your summary.");
+  render();
+  showToast("Evidence status saved. This will appear in your summary.");
 }
 
 function saveEvidenceItem(form) {
   const condition = state.conditions.find((item) => item.id === form.dataset.conditionId);
   if (!condition) return;
   const formData = new FormData(form);
-  condition.items.push({
+  condition.evidenceItems = evidenceItemsFor(condition);
+  condition.evidenceItems.push({
     title: formData.get("title") || "Untitled evidence item",
+    location: formData.get("location") || "",
+    status: formData.get("status") || "Not sure",
+    supports: formData.getAll("supports"),
+    notes: formData.get("notes") || "",
   });
   state.editingEvidenceItem = false;
+  setFeedback("Evidence item saved. No document uploaded.");
   render();
   showToast("Evidence item saved. No document uploaded.");
 }
 
 function saveVsoSearch(form) {
   const formData = new FormData(form);
-  state.vso.searchLocation = formData.get("searchLocation") || "";
+  state.vso.searchLocation = String(formData.get("searchLocation") || "").trim();
+  setFeedback(state.vso.searchLocation ? "Search area set for summary." : "Search area cleared.");
   showToast(state.vso.searchLocation ? "Search area set for summary." : "Search area cleared.");
   render();
+}
+
+function saveVisibleVsoSearchDraft() {
+  const input = screenEl.querySelector("#vsoLocation");
+  const visibleValue = input ? input.value.trim() : "";
+  if (!visibleValue || visibleValue === state.vso.searchLocation) {
+    return false;
+  }
+
+  state.vso.searchLocation = visibleValue;
+  setFeedback("Search area set for summary.");
+  return true;
+}
+
+function generateVsoSummary() {
+  const savedDraft = saveVisibleVsoSearchDraft();
+  setScreen(7);
+  showToast(savedDraft ? "Search area saved and summary generated." : "VSO prep summary generated.");
+}
+
+function requestPrototypeReset() {
+  if (!state.resetArmed) {
+    state.resetArmed = true;
+    setFeedback("Reset needs one more tap. Your current fake test is still here.");
+    render();
+    showToast("Tap Confirm reset sample data to reset.");
+    return;
+  }
+
+  resetPrototype();
 }
 
 function openConditionEditor() {
   state.askNco.open = false;
   state.askNco.scenarioId = null;
   state.pathwayMode = null;
+  state.reviewerGuide = false;
+  state.resetArmed = false;
   state.editingEvidenceItem = false;
   state.screen = 3;
   state.editingCondition = "new";
+  render();
+  screenEl.scrollTop = 0;
+}
+
+function openReviewerGuide() {
+  state.askNco.open = false;
+  state.askNco.scenarioId = null;
+  state.pathwayMode = null;
+  state.editingCondition = null;
+  state.editingEvidenceItem = false;
+  state.reviewerGuide = true;
+  render();
+  screenEl.scrollTop = 0;
+  showToast("Reviewer guide opened.");
+}
+
+function closeReviewerGuide() {
+  state.reviewerGuide = false;
   render();
   screenEl.scrollTop = 0;
 }
@@ -1826,8 +2535,10 @@ document.addEventListener("click", async (event) => {
       saveEvidence(form);
     }
     setScreen(5);
+  } else if (target.matches("[data-generate-summary]")) {
+    generateVsoSummary();
   } else if (target.matches("[data-stage-continue]")) {
-    nextScreen();
+    continueFromStage();
   } else if (target.matches("[data-next]")) {
     nextScreen();
   } else if (target.matches("[data-clear-pathway]")) {
@@ -1835,7 +2546,7 @@ document.addEventListener("click", async (event) => {
     render();
     screenEl.scrollTop = 0;
   } else if (target.matches("[data-open-ask-nco]")) {
-    openAskNco();
+    openAskNco(target.dataset.askOpenScenario || null);
   } else if (target.matches("[data-close-ask-nco]")) {
     closeAskNco();
   } else if (target.matches("[data-ask-scenario]")) {
@@ -1846,6 +2557,20 @@ document.addEventListener("click", async (event) => {
     renderAskNcoPanel();
   } else if (target.matches("[data-open-resources]")) {
     openResources();
+  } else if (target.matches("[data-open-reviewer-guide]")) {
+    openReviewerGuide();
+  } else if (target.matches("[data-close-reviewer-guide]")) {
+    closeReviewerGuide();
+  } else if (target.matches("[data-reviewer-start]")) {
+    state.reviewerGuide = false;
+    setScreen(0);
+    showToast("Reviewer walk-through ready.");
+  } else if (target.matches("[data-reviewer-summary]")) {
+    state.reviewerGuide = false;
+    setScreen(7);
+    showToast("Sample summary opened.");
+  } else if (target.matches("[data-copy-reviewer-feedback]")) {
+    await copyReviewerFeedback();
   } else if (target.matches("[data-add-condition]")) {
     openConditionEditor();
   } else if (target.matches("[data-edit-condition]")) {
@@ -1872,6 +2597,7 @@ document.addEventListener("click", async (event) => {
     state.editingCondition = null;
     state.editingEvidenceItem = false;
     state.pathwayMode = null;
+    state.reviewerGuide = false;
     setScreen(targetScreen);
   } else if (target.matches("[data-copy-summary]")) {
     try {
@@ -1880,8 +2606,15 @@ document.addEventListener("click", async (event) => {
     } catch {
       showToast("Copy is unavailable in this browser. Summary is still on screen.");
     }
+  } else if (target.matches("[data-download-summary]")) {
+    downloadSummary();
+  } else if (target.matches("[data-print-summary]")) {
+    printSummary();
+  } else if (target.matches("[data-reset-prototype]")) {
+    requestPrototypeReset();
   } else if (target.matches("[data-save-vso]")) {
     state.vso.savedOption = target.dataset.saveVso;
+    setFeedback(`${state.vso.savedOption} selected for VSO prep summary.`);
     render();
     showToast(`${state.vso.savedOption} added to VSO prep summary.`);
   }
@@ -1890,6 +2623,10 @@ document.addEventListener("click", async (event) => {
 document.addEventListener("change", (event) => {
   if (event.target.matches('input[name="stage"]')) {
     state.stage = event.target.value;
+  }
+
+  if (event.target.matches("input[type='radio']") && event.target.closest("[data-evidence-form]")) {
+    saveEvidenceChange(event.target);
   }
 });
 
