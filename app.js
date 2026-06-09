@@ -2069,13 +2069,6 @@ function renderSummary() {
         <p><strong>Local actions only</strong>You can copy, download a plain text file, or print from this device. ClaimNCO still has no account, backend, email, or VA submission.</p>
       </div>
 
-      <section class="info-panel">
-        <h3>Official links</h3>
-        <div class="resource-list">
-          ${renderInlineResources()}
-        </div>
-      </section>
-
       <section class="info-panel summary-extra-actions">
         <h3>Summary actions</h3>
         <div class="summary-action-list">
@@ -2088,6 +2081,13 @@ function renderSummary() {
           ${icon(state.resetArmed ? "triangle-alert" : "rotate-ccw")}
           ${state.resetArmed ? "Confirm reset sample data" : "Start a new fake test"}
         </button>
+        </div>
+      </section>
+
+      <section class="info-panel">
+        <h3>Official links</h3>
+        <div class="resource-list">
+          ${renderInlineResources()}
         </div>
       </section>
     </div>
