@@ -2076,7 +2076,7 @@ function renderSummary() {
         </div>
       </section>
 
-      <div class="actions">
+      <div class="actions summary-actions">
         <button class="button primary full" type="button" data-copy-summary>${icon("copy")} Copy summary</button>
         <button class="button secondary full" type="button" data-open-reviewer-guide>${icon("clipboard-check")} Open reviewer guide</button>
         <button class="button secondary full" type="button" data-download-summary>${icon("download")} Download text summary</button>
