@@ -2064,6 +2064,10 @@ function renderSummary() {
 
       <pre class="summary-output" id="summaryOutput">${escapeHtml(prepSummaryText())}</pre>
 
+      <div class="summary-copy-bar">
+        <button class="button primary full" type="button" data-copy-summary>${icon("copy")} Copy summary</button>
+      </div>
+
       <div class="notice">
         ${icon("file-down")}
         <p><strong>Local actions only</strong>You can copy, download a plain text file, or print from this device. ClaimNCO still has no account, backend, email, or VA submission.</p>
@@ -2076,8 +2080,9 @@ function renderSummary() {
         </div>
       </section>
 
-      <div class="actions summary-actions">
-        <button class="button primary full" type="button" data-copy-summary>${icon("copy")} Copy summary</button>
+      <section class="info-panel summary-extra-actions">
+        <h3>More summary actions</h3>
+        <div class="summary-action-list">
         <button class="button secondary full" type="button" data-open-reviewer-guide>${icon("clipboard-check")} Open reviewer guide</button>
         <button class="button secondary full" type="button" data-download-summary>${icon("download")} Download text summary</button>
         <button class="button secondary full" type="button" data-print-summary>${icon("printer")} Print summary</button>
@@ -2086,9 +2091,8 @@ function renderSummary() {
           ${icon(state.resetArmed ? "triangle-alert" : "rotate-ccw")}
           ${state.resetArmed ? "Confirm reset sample data" : "Start a new fake test"}
         </button>
-      </div>
-
-      ${renderBottomNav("Summary")}
+        </div>
+      </section>
     </div>
   `;
 }
